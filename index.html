@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ڈیجیٹل پروڈکٹ کیٹلاگ میکر</title>
+    <title>نیو قاری ہوزری سٹور - ڈیجیٹل پروڈکٹ کیٹلاگ</title>
     <!-- پریمیم ڈیزائن کے لیے Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- آئیکنز کے لیے FontAwesome -->
@@ -48,15 +48,19 @@
     <header class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-lg sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
-                <div class="bg-white/20 p-2 rounded-lg">
-                    <i class="fa-solid fa-book-open text-2xl text-yellow-300"></i>
+                <div class="bg-white/20 p-2.5 rounded-xl">
+                    <i class="fa-solid fa-shop text-2xl text-yellow-300"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl sm:text-2xl font-bold tracking-wide">ڈیجیٹل کیٹلاگ میکر</h1>
-                    <div class="flex items-center gap-2 flex-wrap mt-1">
-                        <p class="text-xs text-teal-100">پروڈکٹس مینیج کریں، تصاویر اور پی ڈی ایف واٹس ایپ پر شیئر کریں</p>
-                        <!-- کلاؤڈ ڈیٹا بیس کا لائیو اسٹیٹس (صرف ایڈمن کے لیے اہم ہے لیکن کسٹمر کو بھی کنکشن دکھائے گا) -->
-                        <div id="dbStatusBadge">
+                    <h1 class="text-xl sm:text-3xl font-bold tracking-wide" style="font-family: 'Noto Nastaliq Urdu', sans-serif; line-height: 1.8;">نیو قاری ہوزری سٹور</h1>
+                    <div class="flex items-center gap-2 flex-wrap mt-0.5 text-xs sm:text-sm text-teal-100">
+                        <span class="flex items-center gap-1">
+                            <i class="fa-solid fa-location-dot text-yellow-300"></i>
+                            نزد مبارک مسجد قائد اعظم مارکیٹ فیصل آباد
+                        </span>
+                        <span class="text-teal-300 hidden sm:inline">|</span>
+                        <!-- کلاؤڈ ڈیٹا بیس کا لائیو اسٹیٹس -->
+                        <div id="dbStatusBadge" class="inline-block">
                             <span class="bg-teal-800/50 text-teal-200 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-spinner animate-spin"></i> منسلک ہو رہا ہے...
                             </span>
@@ -77,10 +81,10 @@
     <!-- کسٹمر خوش آمدید بینر (صرف گاہکوں کو نظر آئے گا) -->
     <div id="customerWelcomeBanner" class="hidden container mx-auto px-4 mt-6 max-w-7xl">
         <div class="bg-gradient-to-r from-teal-50 to-emerald-50 border-r-4 border-emerald-600 p-4 rounded-xl shadow-xs text-emerald-950">
-            <h3 class="font-bold text-base sm:text-lg flex items-center gap-2">
-                <span>👋</span> خوش آمدید! ہمارا ڈیجیٹل پروڈکٹ کیٹلاگ ملاحظہ فرمائیں
+            <h3 class="font-bold text-base sm:text-lg flex items-center gap-2" style="font-family: 'Vazirmatn', sans-serif;">
+                <span>👋</span> خوش آمدید! نیو قاری ہوزری سٹور کے آفیشل کیٹلاگ پر خوش آمدید
             </h3>
-            <p class="text-xs sm:text-sm text-emerald-800 mt-1">آپ کسی بھی پروڈکٹ کو خریدنے یا مزید معلومات کے لیے اس کے نیچے بنے سبز بٹن پر کلک کر کے ہمیں واٹس ایپ پر براہِ راست آرڈر بھیج سکتے ہیں۔</p>
+            <p class="text-xs sm:text-sm text-emerald-800 mt-1">آپ ہماری دکان کی تمام مصنوعات ان کے ریٹس کے ساتھ نیچے دیکھ سکتے ہیں۔ کسی بھی پروڈکٹ کو پسند کر کے دکان کے واٹس ایپ نمبر پر آرڈر کرنے کے لیے اس کے نیچے بنے سبز بٹن پر کلک کریں۔</p>
         </div>
     </div>
 
@@ -188,7 +192,7 @@
             <form id="addProductForm" onsubmit="saveNewProduct(event)" class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">پروڈکٹ کا نام <span class="text-red-500">*</span></label>
-                    <input type="text" id="prodName" required placeholder="مثال: لیدر والٹ، وائرلیس چارجر" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                    <input type="text" id="prodName" required placeholder="مثال: دستانے، لیدر ساکس" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none">
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -295,14 +299,15 @@
         </div>
     </div>
 
-    <!-- پی ڈی ایف پرنٹ ٹیمپلیٹ -->
+    <!-- پی ڈی ایف پرنٹ ٹیمپلیٹ (برانڈڈ ہیڈر کے ساتھ) -->
     <div class="hidden">
         <div id="pdfPrintArea" style="width: 794px; padding: 40px; box-sizing: border-box; background-color: #ffffff; direction: rtl; text-align: right;">
             <!-- ہیڈر -->
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0d9488; padding-bottom: 20px; margin-bottom: 30px;">
                 <div>
-                    <h1 style="font-size: 36px; font-weight: bold; color: #0d9488; margin: 0; font-family: sans-serif;">آفیشل پروڈکٹ کیٹلاگ</h1>
-                    <p style="font-size: 16px; color: #64748b; margin: 5px 0 0 0; font-family: sans-serif;">ہمارے تمام پراڈکٹس کی لسٹ اور تازہ ترین ریٹس</p>
+                    <h1 style="font-size: 38px; font-weight: bold; color: #0d9488; margin: 0; font-family: sans-serif;">نیو قاری ہوزری سٹور</h1>
+                    <p style="font-size: 16px; color: #475569; margin: 8px 0 0 0; font-family: sans-serif;">نزد مبارک مسجد قائد اعظم مارکیٹ فیصل آباد</p>
+                    <p style="font-size: 14px; color: #15803d; margin: 3px 0 0 0; font-weight: bold; font-family: sans-serif;">📞 واٹس ایپ رابطہ: 03065378112</p>
                 </div>
                 <div style="text-align: left;">
                     <p style="font-size: 14px; color: #94a3b8; margin: 0; font-family: sans-serif;">تاریخِ اجراء</p>
@@ -316,7 +321,7 @@
             </div>
             
             <!-- فوٹر -->
-            <div style="border-t: 1px solid #e2e8f0; padding-top: 20px; margin-top: 40px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #94a3b8; font-family: sans-serif;">
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 40px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #94a3b8; font-family: sans-serif;">
                 <p>ہم سے تعاون کرنے کا شکریہ!</p>
                 <p>ڈیجیٹل کیٹلاگ میکر کے ذریعے تیار کردہ</p>
             </div>
@@ -342,7 +347,10 @@
         // فائر بیس شروع کرنا
         let app, auth, db, appId;
         let isOfflineMode = false;
-        let isCustomerMode = false; // کسٹمر موڈ کو مانیٹر کرنے والا فلیگ
+        let isCustomerMode = false;
+
+        // دکان کا آفیشل واٹس ایپ نمبر (آرڈر بھیجنے کے لیے)
+        const shopWhatsAppNumber = "923065378112"; 
 
         try {
             app = initializeApp(firebaseConfig);
@@ -360,7 +368,7 @@
 
         const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100%' height='100%' fill='%23f1f5f9'/><text x='50%' y='50%' font-size='11' font-family='sans-serif' fill='%2394a3b8' dominant-baseline='middle' text-anchor='middle'>تصویر منتخب نہیں کی گئی</text></svg>";
 
-        // کسٹمر یا ایڈمن موڈ معلوم کرنا (URL پیرامیٹر کی مدد سے)
+        // کسٹمر یا ایڈمن موڈ مانیٹر کرنا
         const checkMode = () => {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('view') === 'customer') {
@@ -379,11 +387,10 @@
 
         // کسٹمر شیئر لنک کاپی کرنے کا فنکشن (سماٹ لنک جنریٹر)
         function copyCustomerLink() {
-            // موجودہ URL سے کسی بھی پرانے پیرامیٹر کو صاف کر کے صرف اصل پاتھ حاصل کریں
             const baseUrl = window.location.href.split('?')[0];
             const customerUrl = `${baseUrl}?view=customer`;
 
-            // کسٹم امپلیمنٹیشن (موبائل اور آئی فریم سیکیورٹی ایشوز سے بچنے کے لیے گائیڈ لائن فالو کی گئی ہے)
+            // کسٹم کلپ بورڈ کاپیر سسٹم
             const tempInput = document.createElement('input');
             tempInput.value = customerUrl;
             document.body.appendChild(tempInput);
@@ -630,7 +637,7 @@
             grid.innerHTML = '';
 
             listToRender.forEach(prod => {
-                // اگر کسٹمر موڈ ایکٹیو ہو تو ایڈمن ایڈٹ بٹن چھپا کر آرڈر والا بٹن بنائیں
+                // اگر کسٹمر موڈ ایکٹیو ہو تو ایڈمن ایڈٹ بٹن چھپا کر سیدھا آرڈر والا بٹن بنائیں
                 let actionButtonsHTML = '';
 
                 if (isCustomerMode) {
@@ -681,15 +688,15 @@
             });
         }
 
-        // کسٹمر کے لیے واٹس ایپ پر براہ راست پروڈکٹ آرڈر بھیجنے کا لاجک
+        // کسٹمر کے لیے واٹس ایپ پر براہ راست نیو قاری ہوزری سٹور پر آرڈر بھیجنا
         function orderProductOnWhatsApp(id) {
             const prod = products.find(p => p.id === id);
             if (!prod) return;
 
-            const text = `🌟 *السلام علیکم!* 🌟\n\nمیں آپ کے ڈیجیٹل پروڈکٹ کیٹلاگ سے درج ذیل پروڈکٹ کا آرڈر دینا چاہتا ہوں:\n\n📦 *پروڈکٹ:* ${prod.name}\n💰 *ریٹ/قیمت:* ${prod.price} روپے\n📝 *تفصیل:* ${prod.desc}\n\nبراہ کرم میرے آرڈر کی تصدیق فرمائیں۔ شکریہ!`;
+            const text = `🌟 *نیا آرڈر (نیو قاری ہوزری سٹور)* 🌟\n\nمحترم قاری صاحب! میں آپ کے ڈیجیٹل کیٹلاگ سے درج ذیل پروڈکٹ کا آرڈر دینا چاہتا ہوں:\n\n📦 *پروڈکٹ:* ${prod.name}\n💰 *ریٹ/قیمت:* ${prod.price} روپے\n📝 *تفصیل:* ${prod.desc}\n\nبراہ کرم میرے آرڈر کی دستیابی کی تصدیق فرما دیں۔ شکریہ!`;
             
             const encodedText = encodeURIComponent(text);
-            const waUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+            const waUrl = `https://api.whatsapp.com/send?phone=${shopWhatsAppNumber}&text=${encodedText}`;
             window.open(waUrl, '_blank');
         }
 
@@ -828,7 +835,7 @@
             const prod = products.find(p => p.id === id);
             if (!prod) return;
 
-            const shareText = `🛍️ *پروڈکٹ:* ${prod.name}\n💰 *ریٹ/قیمت:* ${prod.price} روپے\n📝 *تفصیل:* ${prod.desc}\n\nڈیجیٹل کیٹلاگ میکر کے ذریعے بھیجا گیا۔`;
+            const shareText = `🛍️ *پروڈکٹ:* ${prod.name}\n💰 *قیمت:* ${prod.price} روپے\n📝 *تفصیل:* ${prod.desc}\n\nنیو قاری ہوزری سٹور، فیصل آباد۔`;
 
             if (navigator.canShare && navigator.share) {
                 try {
@@ -880,8 +887,8 @@
                 return;
             }
 
-            let msg = `🌟 *السلام علیکم!* 🌟\n`;
-            msg += `ہمارے پاس دستیاب مصنوعات (Products List) اور ریٹس درج ذیل ہیں:\n\n`;
+            let msg = `🌟 *السلام علیکم! (نیو قاری ہوزری سٹور)* 🌟\n`;
+            msg += `ہماری دستیاب ہول سیل مصنوعات کی تفصیلات اور ریٹس:\n\n`;
             msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
 
             products.forEach((prod, index) => {
@@ -894,7 +901,7 @@
             });
 
             msg += `━━━━━━━━━━━━━━━━━━━\n`;
-            msg += `آرڈر کے لیے رابطہ کریں۔ شکریہ!`;
+            msg += `📍 *نیو قاری ہوزری سٹور* \nنزد مبارک مسجد قائد اعظم مارکیٹ فیصل آباد\n📞 آرڈرز کے لیے رابطہ کریں: 03065378112`;
 
             const encodedText = encodeURIComponent(msg);
             const waUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
@@ -946,7 +953,7 @@
                 return;
             }
 
-            showToast('پروسیسنگ', 'بڑی تصاویر والا پی ڈی ایف کیٹلاگ تیار کیا جا رہا ہے...', 'fa-solid fa-spinner animate-spin text-indigo-400');
+            showToast('پروسیسنگ', 'پی ڈی ایف کیٹلاگ تیار کیا جا رہا ہے...', 'fa-solid fa-spinner animate-spin text-indigo-400');
 
             buildPDFTable();
 
@@ -973,8 +980,8 @@
                 if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
                     await navigator.share({
                         files: [pdfFile],
-                        title: 'پروفیشنل پروڈکٹ کیٹلاگ',
-                        text: 'ہمارا جدید پروڈکٹ کیٹلاگ (پی ڈی ایف) ملاحظہ فرمائیں۔'
+                        title: 'نیو قاری ہوزری سٹور - کیٹلاگ',
+                        text: 'ہمارا تازہ ترین پی ڈی ایف کیٹلاگ ملاحظہ فرمائیں۔'
                     });
                     showToast('کامیابی', 'پی ڈی ایف فائل شیئر کے لیے تیار ہو گئی ہے!', 'fa-solid fa-circle-check text-emerald-400');
                 } else {
@@ -994,7 +1001,7 @@
                 return;
             }
 
-            showToast('پروسیسنگ', 'بڑی تصاویر والا پی ڈی ایف کیٹلاگ تیار کیا جا رہا ہے...', 'fa-solid fa-spinner animate-spin text-blue-500');
+            showToast('پروسیسنگ', 'پی ڈی ایف کیٹلاگ تیار کیا جا رہا ہے...', 'fa-solid fa-spinner animate-spin text-blue-500');
 
             buildPDFTable();
 
@@ -1012,7 +1019,7 @@
 
             html2pdf().set(opt).from(element).save().then(() => {
                 element.parentElement.className = originalClass;
-                showToast('کامیابی', 'بڑی تصویروں والا پی ڈی ایف کیٹلاگ ڈاؤن لوڈ ہو گیا ہے!', 'fa-solid fa-circle-check text-emerald-400');
+                showToast('کامیابی', 'پی ڈی ایف کیٹلاگ ڈاؤن لوڈ ہو گیا ہے!', 'fa-solid fa-circle-check text-emerald-400');
             }).catch(err => {
                 element.parentElement.className = originalClass;
                 showToast('خرابی', 'پی ڈی ایف بنانے میں دشواری پیش آئی ہے!', 'fa-solid fa-circle-xmark text-red-500');
@@ -1038,8 +1045,8 @@
         window.shareOnWhatsApp = shareOnWhatsApp;
         window.sharePDFOnWhatsApp = sharePDFOnWhatsApp;
         window.generatePDF = generatePDF;
-        window.copyCustomerLink = copyCustomerLink; // نیا لنک کاپی بٹن بائنڈ کیا گیا ہے
-        window.orderProductOnWhatsApp = orderProductOnWhatsApp; // کسٹمر واٹس ایپ آرڈر بٹن بائنڈ کیا گیا ہے
+        window.copyCustomerLink = copyCustomerLink;
+        window.orderProductOnWhatsApp = orderProductOnWhatsApp;
 
     </script>
 </body>
