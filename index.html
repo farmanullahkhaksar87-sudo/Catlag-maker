@@ -35,7 +35,7 @@
             background: #94a3b8;
         }
 
-        /* پی ڈی ایف پیج بریک کو ٹھیک کرنے کے لیے */
+        /* پی ڈی ایف پیج بریک کنٹرول */
         .pdf-item {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
@@ -279,26 +279,29 @@
         </div>
     </div>
 
-    <!-- پی ڈی ایف پرنٹ ٹیمپلیٹ (پوشیدہ) -->
+    <!-- پی ڈی ایف پرنٹ ٹیمپلیٹ (موبائل پر کٹنے سے بچانے کے لیے فکسڈ 794px چوڑائی) -->
     <div class="hidden">
-        <div id="pdfPrintArea" class="bg-white p-8 text-right text-slate-800" dir="rtl" style="font-family: 'Vazirmatn', sans-serif;">
-            <div class="flex justify-between items-center border-b-2 border-slate-300 pb-4 mb-6">
+        <div id="pdfPrintArea" style="width: 794px; padding: 40px; box-sizing: border-box; background-color: #ffffff; direction: rtl; text-align: right;">
+            <!-- ہیڈر -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0d9488; padding-bottom: 20px; margin-bottom: 30px;">
                 <div>
-                    <h1 class="text-3xl font-bold text-teal-700">پروڈکٹ کیٹلاگ</h1>
-                    <p class="text-slate-500 text-sm mt-1">ڈیجیٹل لسٹ اور آفیشل ریٹس</p>
+                    <h1 style="font-size: 36px; font-weight: bold; color: #0d9488; margin: 0; font-family: sans-serif;">آفیشل پروڈکٹ کیٹلاگ</h1>
+                    <p style="font-size: 16px; color: #64748b; margin: 5px 0 0 0; font-family: sans-serif;">ہمارے تمام پراڈکٹس کی لسٹ اور تازہ ترین ریٹس</p>
                 </div>
-                <div class="text-left">
-                    <p class="text-xs text-slate-400">تاریخِ اجراء</p>
-                    <p id="pdfDate" class="text-sm font-semibold text-slate-700"></p>
+                <div style="text-align: left;">
+                    <p style="font-size: 14px; color: #94a3b8; margin: 0; font-family: sans-serif;">تاریخِ اجراء</p>
+                    <p id="pdfDate" style="font-size: 16px; font-weight: bold; color: #334155; margin: 5px 0 0 0; font-family: sans-serif;"></p>
                 </div>
             </div>
             
-            <div id="pdfProductsTable" class="space-y-6">
-                <!-- پروڈکٹس پی ڈی ایف فارمیٹ میں شامل ہوں گی -->
+            <!-- لسٹنگ ایریا -->
+            <div id="pdfProductsTable" style="display: flex; flex-direction: column; gap: 24px;">
+                <!-- پروڈکٹس یہاں رینڈر ہوں گی -->
             </div>
             
-            <div class="border-t border-slate-200 pt-6 mt-8 flex justify-between items-center text-xs text-slate-400">
-                <p>شکریہ! آپ کے تعاون کا انتہائی احترام کرتے ہیں۔</p>
+            <!-- فوٹر -->
+            <div style="border-t: 1px solid #e2e8f0; padding-top: 20px; margin-top: 40px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #94a3b8; font-family: sans-serif;">
+                <p>ہم سے تعاون کرنے کا شکریہ!</p>
                 <p>ڈیجیٹل کیٹلاگ میکر کے ذریعے تیار کردہ</p>
             </div>
         </div>
@@ -457,7 +460,7 @@
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 500; // بڑی کوالٹی کے لیے حد تھوڑی بڑھائی گئی
+                    const MAX_WIDTH = 500; 
                     const MAX_HEIGHT = 500; 
                     let width = img.width;
                     let height = img.height;
@@ -814,28 +817,34 @@
             window.open(waUrl, '_blank');
         }
 
-        // پی ڈی ایف ایلیمنٹس بنانے کا مشترکہ اور جدید ٹیمپلیٹ (بڑی تصویر کے ساتھ)
+        // پی ڈی ایف ٹیمپلیٹ بنانا (بغیر کسی کٹنگ کے فکسڈ پکسلز اور بڑی لکھیت کے ساتھ)
         function buildPDFTable() {
             const tableArea = document.getElementById('pdfProductsTable');
             tableArea.innerHTML = ''; // پرانا مواد صاف کریں
 
             products.forEach((prod, index) => {
-                // پی ڈی ایف کے لیے ایک خوبصورت اور کشادہ کارڈ لے آؤٹ، تصویر کو 'w-36 h-36' کیا گیا ہے (بڑا سائز)
+                // ہر پروڈکٹ کو ایک واضح اور بڑے کارڈ لے آؤٹ میں تبدیل کیا گیا ہے جو کٹے گا نہیں
                 const row = `
-                    <div class="flex items-start gap-6 border-b border-slate-200 pb-6 mb-6 pdf-item" style="page-break-inside: avoid; break-inside: avoid;">
-                        <!-- بڑی پروڈکٹ امیج -->
-                        <div class="w-36 h-36 flex-shrink-0 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-xs">
-                            <img src="${prod.image}" class="w-full h-full object-cover">
+                    <div class="pdf-item" style="display: flex; flex-direction: row; gap: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 24px; margin-bottom: 12px; align-items: center; box-sizing: border-box;">
+                        <!-- پروڈکٹ کی تصویر کا فکسڈ اور محفوظ فریم -->
+                        <div style="width: 180px; height: 180px; min-width: 180px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 5px;">
+                            <img src="${prod.image}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
                         </div>
-                        <!-- پروڈکٹ کی تفصیلات اور ریٹ -->
-                        <div class="flex-grow flex flex-col justify-between min-h-[9rem] py-1">
-                            <div>
-                                <h3 class="text-xl font-bold text-slate-900">${index + 1}. ${prod.name}</h3>
-                                <p class="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed">${prod.desc}</p>
-                            </div>
-                            <div class="mt-4 flex justify-between items-center">
-                                <span class="bg-teal-50 text-teal-800 text-sm sm:text-base font-bold px-4 py-1.5 rounded-lg border border-teal-100 inline-block">
-                                    💰 قیمت: ${prod.price} روپے
+                        
+                        <!-- تفصیلات کا بڑا کالم -->
+                        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 10px; text-align: right;">
+                            <!-- بڑا پروڈکٹ نام -->
+                            <h3 style="font-size: 26px; font-weight: bold; color: #0f172a; margin: 0; line-height: 1.4; font-family: sans-serif;">
+                                ${index + 1}. ${prod.name}
+                            </h3>
+                            <!-- بڑی اور آرام دہ لکھیت والی تفصیل -->
+                            <p style="font-size: 16px; color: #475569; margin: 0; line-height: 1.6; font-family: sans-serif;">
+                                ${prod.desc}
+                            </p>
+                            <!-- بڑا اور دلکش قیمت کا بیج -->
+                            <div style="margin-top: 10px;">
+                                <span style="background-color: #f0fdf4; color: #166534; font-size: 20px; font-weight: bold; padding: 8px 20px; border-radius: 10px; border: 1px solid #bbf7d0; display: inline-block; font-family: sans-serif;">
+                                    💰 ریٹ: ${prod.price} روپے
                                 </span>
                             </div>
                         </div>
@@ -867,7 +876,7 @@
                 margin:       10,
                 filename:     `Catalog.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
+                html2canvas:  { scale: 2, useCORS: true, width: 794 }, // فکسڈ چوڑائی کوالٹی کو برقرار رکھنے کے لیے
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
@@ -916,7 +925,7 @@
                 margin:       10,
                 filename:     `Product_Catalog_${Date.now()}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
+                html2canvas:  { scale: 2, useCORS: true, width: 794 }, // فکسڈ چوڑائی تاکہ تصویر کٹے نہیں
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
@@ -932,6 +941,10 @@
                 console.error("PDF Error: ", err);
             });
         }
+
+        // تاریخ کو کلاؤڈ لائیو میں اپڈیٹ کرنا
+        const today = new Date();
+        document.getElementById('pdfDate').innerText = today.toLocaleDateString('ur-PK', { year: 'numeric', month: 'long', day: 'numeric' });
 
         // فنکشنز ونڈو بائنڈنگ
         window.openModal = openModal;
