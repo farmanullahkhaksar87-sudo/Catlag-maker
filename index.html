@@ -1,0 +1,859 @@
+```html
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ڈیجیٹل پروڈکٹ کیٹلاگ میکر</title>
+    <!-- پریمیم ڈیزائن کے لیے Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- آئیکنز کے لیے FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- پی ڈی ایف بنانے کے لیے لائبریری -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Vazirmatn:wght@300;400;700&display=swap');
+        
+        body {
+            font-family: 'Vazirmatn', 'Noto Nastaliq Urdu', system-ui, sans-serif;
+        }
+        
+        /* کسٹم اسکرول بار */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col pb-12">
+
+    <!-- ہیڈر / نیویگیشن -->
+    <header class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-lg sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 p-2 rounded-lg">
+                    <i class="fa-solid fa-book-open text-2xl text-yellow-300"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-wide">ڈیجیٹل کیٹلاگ میکر</h1>
+                    <div class="flex items-center gap-2 flex-wrap mt-1">
+                        <p class="text-xs text-teal-100">پروڈکٹس مینیج کریں، تصاویر اور پی ڈی ایف واٹس ایپ پر شیئر کریں</p>
+                        <!-- کلاؤڈ ڈیٹا بیس کا لائیو اسٹیٹس -->
+                        <div id="dbStatusBadge">
+                            <span class="bg-teal-800/50 text-teal-200 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-spinner animate-spin"></i> منسلک ہو رہا ہے...
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="openModal('addProductModal')" class="bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold px-4 py-2.5 rounded-lg shadow-md transition duration-200 flex items-center gap-2 text-sm sm:text-base">
+                    <i class="fa-solid fa-plus"></i>
+                    نئی پروڈکٹ شامل کریں
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- مین باڈی -->
+    <main class="container mx-auto px-4 py-6 flex-grow max-w-7xl">
+        
+        <!-- کاؤنٹرز اور سرچ بار -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <!-- پروڈکٹ کاؤنٹ کارڈ -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-500 font-bold">کل پروڈکٹس</p>
+                    <h3 id="totalProductsCount" class="text-2xl font-bold text-teal-600 mt-1">0</h3>
+                </div>
+                <div class="bg-teal-50 p-3 rounded-lg text-teal-600 text-xl">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+            </div>
+
+            <!-- سرچ بار -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-2 md:col-span-2">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2"></i>
+                <input type="text" id="searchBar" oninput="filterProducts()" placeholder="پروڈکٹ کا نام یا تفصیل تلاش کریں..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                <button onclick="clearSearch()" class="text-xs text-slate-400 hover:text-slate-600 px-2">صاف کریں</button>
+            </div>
+        </div>
+
+        <!-- ایکشن بٹنز -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 mb-6 flex flex-col sm:flex-row gap-3 justify-between items-center">
+            <div>
+                <h2 class="text-base font-bold text-slate-700 flex items-center gap-2">
+                    <i class="fa-solid fa-gears text-teal-600"></i>
+                    کیٹلاگ مینیجر
+                </h2>
+                <p class="text-xs text-slate-400 mt-0.5">پورا کیٹلاگ پی ڈی ایف فائل یا ٹیکسٹ فارمیٹ میں شیئر کریں۔</p>
+            </div>
+            <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                <button onclick="generatePDF()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    پی ڈی ایف ڈاؤن لوڈ کریں
+                </button>
+                <button onclick="sharePDFOnWhatsApp()" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-share-nodes"></i>
+                    پی ڈی ایف فائل واٹس ایپ کریں
+                </button>
+                <button onclick="shareOnWhatsApp()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    ٹیکسٹ لسٹ واٹس ایپ کریں
+                </button>
+            </div>
+        </div>
+
+        <!-- خالی ہونے کا الرٹ -->
+        <div id="noProductsAlert" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300 shadow-sm">
+            <div class="text-slate-300 text-6xl mb-4">
+                <i class="fa-solid fa-box-open"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-600 mb-1">کوئی پروڈکٹ موجود نہیں ہے</h3>
+            <p class="text-slate-400 text-sm mb-4">اپنا پہلا کیٹلاگ بنانے کے لیے نیچے بٹن دبا کر پروڈکٹ شامل کریں!</p>
+            <button onclick="openModal('addProductModal')" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-4 py-2 rounded-lg shadow-md transition">
+                پہلی پروڈکٹ شامل کریں
+            </button>
+        </div>
+
+        <!-- پروڈکٹس لسٹ -->
+        <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- پروڈکٹس یہاں متحرک طور پر ظاہر ہوں گی -->
+        </div>
+
+    </main>
+
+    <!-- نئی پروڈکٹ شامل کرنے کا ماڈل -->
+    <div id="addProductModal" class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="bg-teal-600 text-white px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    نئی پروڈکٹ شامل کریں
+                </h3>
+                <button onclick="closeModal('addProductModal')" class="text-white/80 hover:text-white text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="addProductForm" onsubmit="saveNewProduct(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">پروڈکٹ کا نام <span class="text-red-500">*</span></label>
+                    <input type="text" id="prodName" required placeholder="مثال: لیدر والٹ، وائرلیس چارجر" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">قیمت / ریٹ (روپے) <span class="text-red-500">*</span></label>
+                        <input type="number" id="prodPrice" required placeholder="مثال: 1200" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">تصویر اپلوڈ کریں <span class="text-slate-400">(اختیاری)</span></label>
+                        <input type="file" id="prodImage" accept="image/*" onchange="previewImage(this, 'imgPreview')" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100">
+                    </div>
+                </div>
+                <!-- تصویر کا پیش نظارہ -->
+                <div class="flex justify-center">
+                    <img id="imgPreview" src="" class="hidden w-24 h-24 object-cover rounded-lg border border-slate-200 shadow-sm" alt="پیش نظارہ">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">تفصیل / ڈسکرپشن</label>
+                    <textarea id="prodDesc" rows="3" placeholder="پروڈکٹ کی خصوصیات، سائز، یا دیگر تفصیلات درج کریں..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
+                </div>
+                <div class="flex gap-3 justify-end pt-2">
+                    <button type="button" onclick="closeModal('addProductModal')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-lg text-sm transition">
+                        منسوخ کریں
+                    </button>
+                    <button type="submit" id="saveBtn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-5 py-2 rounded-lg text-sm shadow transition">
+                        محفوظ کریں
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- پروڈکٹ ایڈٹ کرنے کا ماڈل -->
+    <div id="editProductModal" class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    پروڈکٹ ایڈٹ کریں
+                </h3>
+                <button onclick="closeModal('editProductModal')" class="text-white/80 hover:text-white text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="editProductForm" onsubmit="saveEditedProduct(event)" class="p-6 space-y-4">
+                <input type="hidden" id="editProdId">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">پروڈکٹ کا نام <span class="text-red-500">*</span></label>
+                    <input type="text" id="editProdName" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">قیمت / ریٹ (روپے) <span class="text-red-500">*</span></label>
+                        <input type="number" id="editProdPrice" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">تصویر تبدیل کریں</label>
+                        <input type="file" id="editProdImage" accept="image/*" onchange="previewImage(this, 'editImgPreview')" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    </div>
+                </div>
+                <!-- تصویر کا پیش نظارہ -->
+                <div class="flex justify-center">
+                    <img id="editImgPreview" src="" class="hidden w-24 h-24 object-cover rounded-lg border border-slate-200 shadow-sm" alt="پیش نظارہ">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">تفصیل / ڈسکرپشن</label>
+                    <textarea id="editProdDesc" rows="3" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                </div>
+                <div class="flex gap-3 justify-end pt-2">
+                    <button type="button" onclick="closeModal('editProductModal')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-lg text-sm transition">
+                        منسوخ کریں
+                    </button>
+                    <button type="submit" id="editSaveBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-lg text-sm shadow transition">
+                        تبدیلیاں محفوظ کریں
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- نوٹیفکیشن ٹوسٹ -->
+    <div id="toast" class="fixed bottom-5 right-5 left-5 sm:left-auto bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0 z-50 max-w-sm">
+        <span id="toastIcon" class="text-teal-400 text-lg"></span>
+        <p id="toastMessage" class="text-sm font-semibold"></p>
+    </div>
+
+    <!-- ڈیلیٹ تصدیقی ڈائیلاگ -->
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-6 text-center">
+                <div class="text-red-500 text-5xl mb-3">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">کیا آپ واقعی حذف کرنا چاہتے ہیں؟</h3>
+                <p class="text-slate-500 text-sm mb-6">اس عمل کو واپس نہیں لیا جا سکے گا اور پروڈکٹ کیٹلاگ سے نکل جائے گی۔</p>
+                <div class="flex gap-3 justify-center">
+                    <button onclick="closeModal('deleteConfirmModal')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold transition">
+                        نہیں، منسوخ کریں
+                    </button>
+                    <button id="confirmDeleteBtn" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-md transition">
+                        جی ہاں، حذف کریں
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- پی ڈی ایف پرنٹ ٹیمپلیٹ (پوشیدہ) -->
+    <div class="hidden">
+        <div id="pdfPrintArea" class="bg-white p-8 text-right text-slate-800" dir="rtl" style="font-family: sans-serif;">
+            <div class="flex justify-between items-center border-b-2 border-slate-300 pb-4 mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-teal-700">پروڈکٹ کیٹلاگ</h1>
+                    <p class="text-slate-500 text-sm mt-1">ڈیجیٹل لسٹ اور آفیشل ریٹس</p>
+                </div>
+                <div class="text-left">
+                    <p class="text-xs text-slate-400">تاریخِ اجراء</p>
+                    <p id="pdfDate" class="text-sm font-semibold text-slate-700"></p>
+                </div>
+            </div>
+            
+            <div id="pdfProductsTable" class="space-y-4">
+                <!-- پروڈکٹس پی ڈی ایف فارمیٹ میں شامل ہوں گی -->
+            </div>
+            
+            <div class="border-t border-slate-200 pt-6 mt-8 flex justify-between items-center text-xs text-slate-400">
+                <p>شکریہ! آپ کے تعاون کا انتہائی احترام کرتے ہیں۔</p>
+                <p>ڈیجیٹل کیٹلاگ میکر کے ذریعے تیار کردہ</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- فائر بیس کلاؤڈ اور جاوا اسکرپٹ لاجک -->
+    <script type="module">
+        // فائر بیس کی آفیشل ایس ڈی کے (SDK) لوڈ کرنا
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // فائر بیس کنفیگریشن (صارف کے اسکرین شاٹ کے مطابق)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCt3v7r0J7HWVoSaSwxKaQmjcAAPFDXQD4",
+            authDomain: "catlag-7c3c3.firebaseapp.com",
+            projectId: "catlag-7c3c3",
+            storageBucket: "catlag-7c3c3.firebasestorage.app",
+            messagingSenderId: "643483172502",
+            appId: "1:643483172502:web:f4896d6c616ec746f10cb7"
+        };
+
+        // فائر بیس سروسز کو شروع کرنا
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'catlag-7c3c3';
+
+        // گلوبل اسٹیٹ برائے پروڈکٹس اور صارف
+        let products = [];
+        let uploadedImageBase64 = "";
+        let user = null;
+
+        // ڈیفالٹ تصویر
+        const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100%' height='100%' fill='%23f1f5f9'/><text x='50%' y='50%' font-size='11' font-family='sans-serif' fill='%2394a3b8' dominant-baseline='middle' text-anchor='middle'>تصویر منتخب نہیں کی گئی</text></svg>";
+
+        // کلاؤڈ تصدیق (Authentication - Rule 3 کے تحت)
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("بیک اینڈ کنکشن میں خرابی:", error);
+                document.getElementById('dbStatusBadge').innerHTML = `<span class="bg-red-100 text-red-800 text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1"><i class="fa-solid fa-circle-xmark"></i> نیٹ ورک خرابی</span>`;
+                showToast('خرابی', 'کلاؤڈ سرور سے منسلک ہونے میں ناکامی۔', 'fa-solid fa-circle-xmark text-red-500');
+            }
+        };
+
+        // صارف کی لاگ ان حالت مانیٹر کرنا
+        onAuthStateChanged(auth, (u) => {
+            user = u;
+            if (user) {
+                document.getElementById('dbStatusBadge').innerHTML = `<span class="bg-emerald-100 text-emerald-800 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1"><i class="fa-solid fa-cloud-bolt text-emerald-500"></i> کلاؤڈ ڈیٹا بیس فعال ہے</span>`;
+                setupProductsListener();
+            } else {
+                document.getElementById('dbStatusBadge').innerHTML = `<span class="bg-amber-100 text-amber-800 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1"><i class="fa-solid fa-cloud-slash"></i> آف لائن موڈ</span>`;
+            }
+        });
+
+        // تصدیقی عمل کو شروع کریں
+        initAuth();
+
+        // فائر بیس پاتھ کی سیٹنگ (Rule 1 کے تحت لازمی فارمیٹ)
+        const getProductsCollection = () => {
+            return collection(db, 'artifacts', appId, 'public', 'data', 'products');
+        };
+
+        // کلاؤڈ ڈیٹا بیس سے رئیل ٹائم ڈیٹا مانیٹر کرنا
+        let unsubscribeProducts = null;
+        function setupProductsListener() {
+            if (!user) return;
+            const colRef = getProductsCollection();
+            
+            // Rule 2 کے مطابق کوئی پیچیدہ فلٹر/آرڈر استعمال نہیں کیا گیا، سادہ لسٹ کو ان میموری ترتیب دیا جائے گا
+            unsubscribeProducts = onSnapshot(colRef, (snapshot) => {
+                products = [];
+                snapshot.forEach((doc) => {
+                    products.push({ id: doc.id, ...doc.data() });
+                });
+                // تاریخ کی بنیاد پر ان میموری ترتیب دینا (Newest First)
+                products.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                renderProducts();
+            }, (error) => {
+                console.error("ڈیٹا ریڈ کرنے میں خرابی:", error);
+                showToast('خرابی', 'کلاؤڈ سے لائیو ڈیٹا حاصل کرنے میں ناکامی۔', 'fa-solid fa-circle-xmark text-red-500');
+            });
+        }
+
+        // ماڈل کھولنا
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        // ماڈل بند کرنا
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            if (id === 'addProductModal') {
+                document.getElementById('addProductForm').reset();
+                document.getElementById('imgPreview').classList.add('hidden');
+                uploadedImageBase64 = "";
+            } else if (id === 'editProductModal') {
+                document.getElementById('editProductForm').reset();
+                document.getElementById('editImgPreview').classList.add('hidden');
+                uploadedImageBase64 = "";
+            }
+        }
+
+        // امیج کمپریسر اور ریسرائزر (تصویر کا سائز گھٹانے کے لیے)
+        function compressAndProcessImage(file, callback) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 400; 
+                    const MAX_HEIGHT = 400; 
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    callback(dataUrl);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // تصویر اپلوڈ کرنے پر اس کا پیش نظارہ
+        function previewImage(input, previewId) {
+            const file = input.files[0];
+            if (file) {
+                showToast('انتظار کریں', 'تصویر کو بہتر (Compress) بنایا جا رہا ہے...', 'fa-solid fa-spinner animate-spin text-blue-500');
+                compressAndProcessImage(file, function(compressedBase64) {
+                    const imgPreview = document.getElementById(previewId);
+                    imgPreview.src = compressedBase64;
+                    imgPreview.classList.remove('hidden');
+                    uploadedImageBase64 = compressedBase64;
+                    showToast('بہترین', 'تصویر اپلوڈ اور بہتر کر دی گئی ہے!', 'fa-solid fa-circle-check text-emerald-400');
+                });
+            }
+        }
+
+        // نئی پروڈکٹ کلاؤڈ ڈیٹا بیس میں محفوظ کرنا
+        async function saveNewProduct(e) {
+            e.preventDefault();
+            if (!user) {
+                showToast('تنبہ', 'کلاؤڈ ڈیٹا بیس سے رابطہ قائم نہیں ہو سکا!', 'fa-solid fa-circle-exclamation text-yellow-500');
+                return;
+            }
+            
+            const name = document.getElementById('prodName').value.trim();
+            const price = parseFloat(document.getElementById('prodPrice').value);
+            const desc = document.getElementById('prodDesc').value.trim();
+            
+            if (!name || isNaN(price)) {
+                showToast('تنبہ', 'پلیز نام اور ریٹ درست طریقے سے درج کریں!', 'fa-solid fa-circle-exclamation text-yellow-500');
+                return;
+            }
+
+            const finalImage = uploadedImageBase64 || placeholderImg;
+
+            const productData = {
+                name: name,
+                price: price,
+                desc: desc || "کوئی تفصیل نہیں دی گئی۔",
+                image: finalImage,
+                createdAt: Date.now()
+            };
+
+            try {
+                const colRef = getProductsCollection();
+                await addDoc(colRef, productData);
+                closeModal('addProductModal');
+                showToast('کامیابی', 'نئی پروڈکٹ کامیابی سے شامل کر دی گئی ہے!', 'fa-solid fa-circle-check text-emerald-400');
+            } catch (error) {
+                console.error("محفوظ کرنے میں خلل:", error);
+                showToast('خرابی', 'کلاؤڈ پر محفوظ کرنے میں ناکامی آئی۔', 'fa-solid fa-circle-xmark text-red-500');
+            }
+        }
+
+        // پروڈکٹس کو اسکرین پر رینڈر کرنا
+        function renderProducts(filteredList = null) {
+            const listToRender = filteredList || products;
+            const grid = document.getElementById('productsGrid');
+            const alertBox = document.getElementById('noProductsAlert');
+            const totalCount = document.getElementById('totalProductsCount');
+            
+            totalCount.innerText = listToRender.length;
+
+            if (listToRender.length === 0) {
+                grid.classList.add('hidden');
+                alertBox.classList.remove('hidden');
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            alertBox.classList.add('hidden');
+
+            grid.innerHTML = '';
+
+            listToRender.forEach(prod => {
+                const card = `
+                    <div class="bg-white rounded-2xl shadow-sm hover:shadow-md border border-slate-100 overflow-hidden flex flex-col group transition duration-300">
+                        <div class="relative h-44 overflow-hidden bg-slate-50 flex items-center justify-center">
+                            <img src="${prod.image}" alt="${prod.name}" onerror="this.src='${placeholderImg}'" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <div class="absolute top-2 right-2 bg-slate-900/70 backdrop-blur-xs text-white px-3 py-1 rounded-full text-xs font-bold">
+                                💰 ${prod.price} روپے
+                            </div>
+                        </div>
+                        <div class="p-4 flex-grow flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-base line-clamp-1 mb-1">${prod.name}</h4>
+                                <p class="text-xs text-slate-400 line-clamp-2 min-h-[2.5rem]">${prod.desc}</p>
+                            </div>
+                            <div class="space-y-2 mt-4 pt-3 border-t border-slate-100">
+                                <button onclick="shareProductWithImage('${prod.id}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs transition flex items-center justify-center gap-2 shadow-sm">
+                                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                                    تصویر اور ریٹ واٹس ایپ کریں
+                                </button>
+                                <div class="flex gap-2">
+                                    <button onclick="openEditModal('${prod.id}')" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-2 rounded-lg text-xs transition flex items-center justify-center gap-1">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                        ایڈٹ
+                                    </button>
+                                    <button onclick="triggerDelete('${prod.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg text-xs transition" title="حذف کریں">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += card;
+            });
+        }
+
+        // سرچ اور فلٹر کرنا
+        function filterProducts() {
+            const query = document.getElementById('searchBar').value.toLowerCase().trim();
+            if (query === '') {
+                renderProducts();
+                return;
+            }
+            const filtered = products.filter(p => 
+                p.name.toLowerCase().includes(query) || 
+                p.desc.toLowerCase().includes(query)
+            );
+            renderProducts(filtered);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchBar').value = '';
+            renderProducts();
+        }
+
+        // پروڈکٹ ڈیلیٹ کرنا
+        let productToDeleteId = null;
+        function triggerDelete(id) {
+            productToDeleteId = id;
+            openModal('deleteConfirmModal');
+        }
+
+        // ڈیلیٹ کی تصدیق کا ایکشن فائر بیس کے ساتھ
+        document.getElementById('confirmDeleteBtn').onclick = async function() {
+            if (!user || !productToDeleteId) return;
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productToDeleteId);
+                await deleteDoc(docRef);
+                closeModal('deleteConfirmModal');
+                showToast('توجہ', 'پروڈکٹ کو کلاؤڈ سے کامیابی سے حذف کر دیا گیا ہے!', 'fa-solid fa-circle-exclamation text-red-500');
+            } catch (error) {
+                console.error("حذف کرنے میں خرابی:", error);
+                showToast('خرابی', 'پروڈکٹ کو حذف کرنے میں خرابی پیش آئی۔', 'fa-solid fa-circle-xmark text-red-500');
+            }
+        };
+
+        // ایڈٹ ماڈل کھولنا
+        function openEditModal(id) {
+            const prod = products.find(p => p.id === id);
+            if (!prod) return;
+
+            document.getElementById('editProdId').value = prod.id;
+            document.getElementById('editProdName').value = prod.name;
+            document.getElementById('editProdPrice').value = prod.price;
+            document.getElementById('editProdDesc').value = prod.desc;
+            
+            const editPreview = document.getElementById('editImgPreview');
+            editPreview.src = prod.image;
+            editPreview.classList.remove('hidden');
+            uploadedImageBase64 = prod.image;
+
+            openModal('editProductModal');
+        }
+
+        // ترمیم شدہ پروڈکٹ کلاؤڈ پر محفوظ کرنا
+        async function saveEditedProduct(e) {
+            e.preventDefault();
+            if (!user) return;
+
+            const id = document.getElementById('editProdId').value;
+            const name = document.getElementById('editProdName').value.trim();
+            const price = parseFloat(document.getElementById('editProdPrice').value);
+            const desc = document.getElementById('editProdDesc').value.trim();
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', id);
+                await updateDoc(docRef, {
+                    name: name,
+                    price: price,
+                    desc: desc || "کوئی تفصیل نہیں دی گئی۔",
+                    image: uploadedImageBase64 || placeholderImg
+                });
+                closeModal('editProductModal');
+                showToast('کامیابی', 'تبدیلیاں کلاؤڈ پر محفوظ کر لی گئی ہیں!', 'fa-solid fa-circle-check text-emerald-400');
+            } catch (error) {
+                console.error("ایڈٹ کرنے میں خرابی:", error);
+                showToast('خرابی', 'ڈیٹا تبدیل کرنے میں خلل آیا۔', 'fa-solid fa-circle-xmark text-red-500');
+            }
+        }
+
+        // ٹوسٹ نوٹیفکیشن سسٹم
+        function showToast(title, msg, iconClass) {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMsg = document.getElementById('toastMessage');
+
+            toastIcon.className = iconClass;
+            toastMsg.innerHTML = `<strong>${title}:</strong> ${msg}`;
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // تصویر اور ریٹ واٹس ایپ پر بھیجنا
+        async function shareProductWithImage(id) {
+            const prod = products.find(p => p.id === id);
+            if (!prod) return;
+
+            const shareText = `🛍️ *پروڈکٹ:* ${prod.name}\n💰 *ریٹ/قیمت:* ${prod.price} روپے\n📝 *تفصیل:* ${prod.desc}\n\nڈیجیٹل کیٹلاگ میکر کے ذریعے بھیجا گیا۔`;
+
+            if (navigator.canShare && navigator.share) {
+                try {
+                    showToast('انتظار کریں', 'فائل تیار کی جا رہی ہے...', 'fa-solid fa-hourglass-start text-indigo-400');
+                    
+                    let file;
+                    if (prod.image.startsWith('data:')) {
+                        const response = await fetch(prod.image);
+                        const blob = await response.blob();
+                        const ext = blob.type.split('/')[1] || 'png';
+                        file = new File([blob], `${prod.name.replace(/\s+/g, '_')}.${ext}`, { type: blob.type });
+                    } else {
+                        const response = await fetch(prod.image);
+                        const blob = await response.blob();
+                        file = new File([blob], 'product.jpg', { type: 'image/jpeg' });
+                    }
+
+                    if (navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            text: shareText,
+                            title: prod.name
+                        });
+                    } else {
+                        throw new Error('فائل شیئرنگ کی اجازت نہیں ہے');
+                    }
+                } catch (error) {
+                    console.log('Share API Error:', error);
+                    fallbackWhatsAppText(shareText);
+                }
+            } else {
+                fallbackWhatsAppText(shareText);
+            }
+        }
+
+        // واٹس ایپ ٹیکسٹ فال بیک
+        function fallbackWhatsAppText(text) {
+            showToast('معلومات', 'موبائل شیئر مینیو دستیاب نہیں ہے۔ واٹس ایپ پر صرف ٹیکسٹ اور لنک بھیجا جا رہا ہے۔', 'fa-solid fa-circle-info text-blue-400');
+            setTimeout(() => {
+                const encodedText = encodeURIComponent(text);
+                const waUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+                window.open(waUrl, '_blank');
+            }, 1500);
+        }
+
+        // مکمل ٹیکسٹ لسٹ واٹس ایپ پر بھیجنا
+        function shareOnWhatsApp() {
+            if (products.length === 0) {
+                showToast('تنبہ', 'پہلے کیٹلاگ میں پروڈکٹس شامل کریں!', 'fa-solid fa-circle-info text-yellow-500');
+                return;
+            }
+
+            let msg = `🌟 *السلام علیکم!* 🌟\n`;
+            msg += `ہمارے پاس دستیاب مصنوعات (Products List) اور ریٹس درج ذیل ہیں:\n\n`;
+            msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            products.forEach((prod, index) => {
+                msg += `🛍️ *${index + 1}. ${prod.name}*\n`;
+                msg += `💰 *قیمت:* ${prod.price} روپے\n`;
+                if (prod.desc && prod.desc !== 'کوئی تفصیل نہیں دی گئی۔') {
+                    msg += `📝 *تفصیل:* ${prod.desc}\n`;
+                }
+                msg += `\n`;
+            });
+
+            msg += `━━━━━━━━━━━━━━━━━━━\n`;
+            msg += `آرڈر کے لیے رابطہ کریں۔ شکریہ!`;
+
+            const encodedText = encodeURIComponent(msg);
+            const waUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+            window.open(waUrl, '_blank');
+        }
+
+        // پی ڈی ایف واٹس ایپ پر فائل کے طور پر بھیجنا
+        async function sharePDFOnWhatsApp() {
+            if (products.length === 0) {
+                showToast('تنبہ', 'پہلے کیٹلاگ میں پروڈکٹس شامل کریں!', 'fa-solid fa-circle-info text-yellow-500');
+                return;
+            }
+
+            if (!navigator.share) {
+                showToast('سپورٹ نہیں ہے', 'براہ کرم اس فیچر کو موبائل فون یا ہم آہنگ براؤزر پر آزمائیں۔', 'fa-solid fa-circle-exclamation text-yellow-500');
+                return;
+            }
+
+            showToast('پروسیسنگ', 'پی ڈی ایف فائل تیار ہو رہی ہے...', 'fa-solid fa-spinner animate-spin text-indigo-400');
+
+            const tableArea = document.getElementById('pdfProductsTable');
+            tableArea.innerHTML = '';
+            products.forEach((prod, index) => {
+                const row = `
+                    <div class="flex items-center gap-4 border-b border-slate-200 pb-4">
+                        <div class="w-16 h-16 flex-shrink-0 bg-slate-50 border rounded-lg overflow-hidden">
+                            <img src="${prod.image}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="text-base font-bold text-slate-800">${index + 1}. ${prod.name}</h3>
+                            <p class="text-xs text-slate-500 mt-1">${prod.desc}</p>
+                        </div>
+                        <div class="text-left font-bold text-teal-700 text-lg whitespace-nowrap min-w-[100px]">
+                            ${prod.price} روپے
+                        </div>
+                    </div>
+                `;
+                tableArea.innerHTML += row;
+            });
+
+            const element = document.getElementById('pdfPrintArea');
+            const opt = {
+                margin:       10,
+                filename:     `Catalog.pdf`,
+                image:        { type: 'jpeg', quality: 0.95 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            const originalClass = element.parentElement.className;
+            element.parentElement.className = 'block';
+
+            try {
+                const pdfInstance = html2pdf().set(opt).from(element);
+                const pdfBlob = await pdfInstance.output('blob');
+                
+                element.parentElement.className = originalClass;
+
+                const pdfFile = new File([pdfBlob], `پی_ڈی_ایف_کیٹلاگ.pdf`, { type: 'application/pdf' });
+
+                if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+                    await navigator.share({
+                        files: [pdfFile],
+                        title: 'پروڈکٹ کیٹلاگ پی ڈی ایف',
+                        text: 'ہمارا آفیشل پروڈکٹ کیٹلاگ (پی ڈی ایف) ملاحظہ فرمائیں۔'
+                    });
+                    showToast('کامیابی', 'پی ڈی ایف فائل شیئر کے لیے تیار ہو گئی ہے!', 'fa-solid fa-circle-check text-emerald-400');
+                } else {
+                    showToast('خرابی', 'براؤزر اس فائل کو براہ راست شیئر کرنے سے روک رہا ہے۔', 'fa-solid fa-circle-exclamation text-yellow-500');
+                }
+            } catch (err) {
+                element.parentElement.className = originalClass;
+                showToast('خرابی', 'پی ڈی ایف بنانے میں ناکامی۔', 'fa-solid fa-circle-xmark text-red-500');
+                console.error(err);
+            }
+        }
+
+        // روایتی پی ڈی ایف ڈاؤن لوڈ
+        function generatePDF() {
+            if (products.length === 0) {
+                showToast('تنبہ', 'پی ڈی ایف بنانے کے لیے کم از کم ایک پروڈکٹ شامل کریں!', 'fa-solid fa-circle-info text-yellow-500');
+                return;
+            }
+
+            showToast('پروسیسنگ', 'پی ڈی ایف کیٹلاگ تیار کی جا رہی ہے، براہ کرم انتظار کریں...', 'fa-solid fa-spinner animate-spin text-blue-500');
+
+            const tableArea = document.getElementById('pdfProductsTable');
+            tableArea.innerHTML = '';
+
+            products.forEach((prod, index) => {
+                const row = `
+                    <div class="flex items-center gap-4 border-b border-slate-200 pb-4">
+                        <div class="w-16 h-16 flex-shrink-0 bg-slate-50 border rounded-lg overflow-hidden">
+                            <img src="${prod.image}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="text-base font-bold text-slate-800">${index + 1}. ${prod.name}</h3>
+                            <p class="text-xs text-slate-500 mt-1">${prod.desc}</p>
+                        </div>
+                        <div class="text-left font-bold text-teal-700 text-lg whitespace-nowrap min-w-[100px]">
+                            ${prod.price} روپے
+                        </div>
+                    </div>
+                `;
+                tableArea.innerHTML += row;
+            });
+
+            const element = document.getElementById('pdfPrintArea');
+            const opt = {
+                margin:       10,
+                filename:     `Product_Catalog_${Date.now()}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            const originalClass = element.parentElement.className;
+            element.parentElement.className = 'block';
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.parentElement.className = originalClass;
+                showToast('کامیابی', 'پی ڈی ایف کامیابی سے ڈاؤن لوڈ کر دی گئی ہے!', 'fa-solid fa-circle-check text-emerald-400');
+            }).catch(err => {
+                element.parentElement.className = originalClass;
+                showToast('خرابی', 'پی ڈی ایف بنانے میں دشواری پیش آئی ہے!', 'fa-solid fa-circle-xmark text-red-500');
+                console.error("PDF Error: ", err);
+            });
+        }
+
+        // ES ماڈیول کے تمام فنکشنز کو ونڈو (global window) آبجیکٹ پر بائنڈ کرنا تاکہ HTML کلک ایونٹس ٹھیک سے کام کریں
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.previewImage = previewImage;
+        window.saveNewProduct = saveNewProduct;
+        window.filterProducts = filterProducts;
+        window.clearSearch = clearSearch;
+        window.triggerDelete = triggerDelete;
+        window.openEditModal = openEditModal;
+        window.saveEditedProduct = saveEditedProduct;
+        window.shareProductWithImage = shareProductWithImage;
+        window.shareOnWhatsApp = shareOnWhatsApp;
+        window.sharePDFOnWhatsApp = sharePDFOnWhatsApp;
+        window.generatePDF = generatePDF;
+
+    </script>
+</body>
+</html>
+
+```
