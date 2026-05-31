@@ -34,6 +34,12 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+
+        /* پی ڈی ایف پیج بریک کو ٹھیک کرنے کے لیے */
+        .pdf-item {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col pb-12">
@@ -66,6 +72,22 @@
             </div>
         </div>
     </header>
+
+    <!-- ہیلپ الرٹ برائے فائر بیس کنکشن -->
+    <div id="firebaseHelpAlert" class="hidden container mx-auto px-4 mt-4 max-w-7xl">
+        <div class="bg-amber-50 border-r-4 border-amber-500 p-4 rounded-xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-900 text-xs sm:text-sm">
+            <div class="flex items-start gap-3">
+                <i class="fa-solid fa-circle-info text-amber-600 text-lg mt-0.5"></i>
+                <div>
+                    <strong class="font-bold">فائر بیس کنکشن گائیڈ:</strong> 
+                    آپ کا ایپ ابھی 'لوکل اسٹوریج' پر چل رہا ہے۔ کلاؤڈ سنک فعال کرنے کے لیے اپنے فائر بیس کنسول میں <span class="bg-amber-100 px-1.5 py-0.5 rounded font-mono">Authentication > Sign-in method</span> میں جا کر <strong class="underline">Anonymous (گمنام)</strong> لاگ ان کو فعال کریں۔
+                </div>
+            </div>
+            <button onclick="document.getElementById('firebaseHelpAlert').classList.add('hidden')" class="text-amber-500 hover:text-amber-700 text-right font-bold text-xs">
+                سمجھ گیا ×
+            </button>
+        </div>
+    </div>
 
     <!-- مین باڈی -->
     <main class="container mx-auto px-4 py-6 flex-grow max-w-7xl">
@@ -259,7 +281,7 @@
 
     <!-- پی ڈی ایف پرنٹ ٹیمپلیٹ (پوشیدہ) -->
     <div class="hidden">
-        <div id="pdfPrintArea" class="bg-white p-8 text-right text-slate-800" dir="rtl" style="font-family: sans-serif;">
+        <div id="pdfPrintArea" class="bg-white p-8 text-right text-slate-800" dir="rtl" style="font-family: 'Vazirmatn', sans-serif;">
             <div class="flex justify-between items-center border-b-2 border-slate-300 pb-4 mb-6">
                 <div>
                     <h1 class="text-3xl font-bold text-teal-700">پروڈکٹ کیٹلاگ</h1>
@@ -271,7 +293,7 @@
                 </div>
             </div>
             
-            <div id="pdfProductsTable" class="space-y-4">
+            <div id="pdfProductsTable" class="space-y-6">
                 <!-- پروڈکٹس پی ڈی ایف فارمیٹ میں شامل ہوں گی -->
             </div>
             
@@ -284,12 +306,11 @@
 
     <!-- فائر بیس کلاؤڈ اور جاوا اسکرپٹ لاجک -->
     <script type="module">
-        // فائر بیس کی آفیشل ایس ڈی کے (SDK) لوڈ کرنا
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // فائر بیس کنفیگریشن (صارف کے اسکرین شاٹ کے مطابق)
+        // فائر بیس کنفیگریشن
         const firebaseConfig = {
             apiKey: "AIzaSyCt3v7r0J7HWVoSaSwxKaQmjcAAPFDXQD4",
             authDomain: "catlag-7c3c3.firebaseapp.com",
@@ -299,22 +320,32 @@
             appId: "1:643483172502:web:f4896d6c616ec746f10cb7"
         };
 
-        // فائر بیس سروسز کو شروع کرنا
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'catlag-7c3c3';
+        // فائر بیس شروع کرنا
+        let app, auth, db, appId;
+        let isOfflineMode = false;
 
-        // گلوبل اسٹیٹ برائے پروڈکٹس اور صارف
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            appId = typeof __app_id !== 'undefined' ? __app_id : 'catlag-7c3c3';
+        } catch(e) {
+            console.error("فائر بیس انیشلائزیشن فیل ہو گئی:", e);
+            isOfflineMode = true;
+        }
+
         let products = [];
         let uploadedImageBase64 = "";
         let user = null;
 
-        // ڈیفالٹ تصویر
         const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100%' height='100%' fill='%23f1f5f9'/><text x='50%' y='50%' font-size='11' font-family='sans-serif' fill='%2394a3b8' dominant-baseline='middle' text-anchor='middle'>تصویر منتخب نہیں کی گئی</text></svg>";
 
-        // کلاؤڈ تصدیق (Authentication - Rule 3 کے تحت)
+        // کلاؤڈ سائن ان لاجک
         const initAuth = async () => {
+            if (isOfflineMode) {
+                switchToOfflineMode();
+                return;
+            }
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
@@ -322,58 +353,90 @@
                     await signInAnonymously(auth);
                 }
             } catch (error) {
-                console.error("بیک اینڈ کنکشن میں خرابی:", error);
-                document.getElementById('dbStatusBadge').innerHTML = `<span class="bg-red-100 text-red-800 text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1"><i class="fa-solid fa-circle-xmark"></i> نیٹ ورک خرابی</span>`;
-                showToast('خرابی', 'کلاؤڈ سرور سے منسلک ہونے میں ناکامی۔', 'fa-solid fa-circle-xmark text-red-500');
+                console.warn("بیک اینڈ کنکشن فیل۔ لوکل آف لائن موڈ پر منتقل کیا جا رہا ہے:", error);
+                switchToOfflineMode();
             }
         };
 
-        // صارف کی لاگ ان حالت مانیٹر کرنا
-        onAuthStateChanged(auth, (u) => {
-            user = u;
-            if (user) {
-                document.getElementById('dbStatusBadge').innerHTML = `<span class="bg-emerald-100 text-emerald-800 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1"><i class="fa-solid fa-cloud-bolt text-emerald-500"></i> کلاؤڈ ڈیٹا بیس فعال ہے</span>`;
-                setupProductsListener();
-            } else {
-                document.getElementById('dbStatusBadge').innerHTML = `<span class="bg-amber-100 text-amber-800 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1"><i class="fa-solid fa-cloud-slash"></i> آف لائن موڈ</span>`;
-            }
-        });
+        // آف لائن موڈ سیٹ کرنے والا فنکشن
+        function switchToOfflineMode() {
+            isOfflineMode = true;
+            document.getElementById('dbStatusBadge').innerHTML = `
+                <span class="bg-amber-100 text-amber-800 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
+                    <i class="fa-solid fa-house-laptop"></i> مقامی اسٹوریج (آف لائن)
+                </span>`;
+            document.getElementById('firebaseHelpAlert').classList.remove('hidden');
+            loadProductsFromLocalStorage();
+        }
 
-        // تصدیقی عمل کو شروع کریں
+        // لوکل اسٹوریج ڈیٹا لوڈ کرنا
+        function loadProductsFromLocalStorage() {
+            const saved = localStorage.getItem('catalog_products');
+            if (saved) {
+                try {
+                    products = JSON.parse(saved);
+                } catch(e) {
+                    products = [];
+                }
+            } else {
+                products = [];
+            }
+            renderProducts();
+        }
+
+        // لوکل اسٹوریج میں محفوظ کرنا
+        function saveToLocalStorage() {
+            localStorage.setItem('catalog_products', JSON.stringify(products));
+        }
+
+        // لاگ ان کی حالت چیک کرنا
+        if (auth) {
+            onAuthStateChanged(auth, (u) => {
+                user = u;
+                if (user && !isOfflineMode) {
+                    document.getElementById('dbStatusBadge').innerHTML = `
+                        <span class="bg-emerald-100 text-emerald-800 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-cloud-bolt"></i> کلاؤڈ ڈیٹا بیس لائیو ہے
+                        </span>`;
+                    document.getElementById('firebaseHelpAlert').classList.add('hidden');
+                    setupProductsListener();
+                }
+            });
+        }
+
         initAuth();
 
-        // فائر بیس پاتھ کی سیٹنگ (Rule 1 کے تحت لازمی فارمیٹ)
         const getProductsCollection = () => {
             return collection(db, 'artifacts', appId, 'public', 'data', 'products');
         };
 
-        // کلاؤڈ ڈیٹا بیس سے رئیل ٹائم ڈیٹا مانیٹر کرنا
+        // رئیل ٹائم کلاؤڈ لسنر
         let unsubscribeProducts = null;
         function setupProductsListener() {
-            if (!user) return;
+            if (!user || isOfflineMode) return;
             const colRef = getProductsCollection();
             
-            // Rule 2 کے مطابق کوئی پیچیدہ فلٹر/آرڈر استعمال نہیں کیا گیا، سادہ لسٹ کو ان میموری ترتیب دیا جائے گا
             unsubscribeProducts = onSnapshot(colRef, (snapshot) => {
                 products = [];
                 snapshot.forEach((doc) => {
                     products.push({ id: doc.id, ...doc.data() });
                 });
-                // تاریخ کی بنیاد پر ان میموری ترتیب دینا (Newest First)
                 products.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                
+                // لوکل کاپی بھی اپڈیٹ رکھیں
+                saveToLocalStorage();
                 renderProducts();
             }, (error) => {
-                console.error("ڈیٹا ریڈ کرنے میں خرابی:", error);
-                showToast('خرابی', 'کلاؤڈ سے لائیو ڈیٹا حاصل کرنے میں ناکامی۔', 'fa-solid fa-circle-xmark text-red-500');
+                console.error("لسنر میں خرابی، آف لائن پر سوئچ کیا جا رہا ہے:", error);
+                switchToOfflineMode();
             });
         }
 
-        // ماڈل کھولنا
+        // ماڈل مینیجر
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
         }
 
-        // ماڈل بند کرنا
         function closeModal(id) {
             document.getElementById(id).classList.add('hidden');
             if (id === 'addProductModal') {
@@ -387,15 +450,15 @@
             }
         }
 
-        // امیج کمپریسر اور ریسرائزر (تصویر کا سائز گھٹانے کے لیے)
+        // امیج پروسیسر
         function compressAndProcessImage(file, callback) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 400; 
-                    const MAX_HEIGHT = 400; 
+                    const MAX_WIDTH = 500; // بڑی کوالٹی کے لیے حد تھوڑی بڑھائی گئی
+                    const MAX_HEIGHT = 500; 
                     let width = img.width;
                     let height = img.height;
 
@@ -416,7 +479,7 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85); // 85% کوالٹی پی ڈی ایف پرنٹنگ کے لیے بہترین ہے
                     callback(dataUrl);
                 };
                 img.src = e.target.result;
@@ -424,39 +487,35 @@
             reader.readAsDataURL(file);
         }
 
-        // تصویر اپلوڈ کرنے پر اس کا پیش نظارہ
         function previewImage(input, previewId) {
             const file = input.files[0];
             if (file) {
-                showToast('انتظار کریں', 'تصویر کو بہتر (Compress) بنایا جا رہا ہے...', 'fa-solid fa-spinner animate-spin text-blue-500');
+                showToast('انتظار کریں', 'تصویر کو بہتر بنایا جا رہا ہے...', 'fa-solid fa-spinner animate-spin text-blue-500');
                 compressAndProcessImage(file, function(compressedBase64) {
                     const imgPreview = document.getElementById(previewId);
                     imgPreview.src = compressedBase64;
                     imgPreview.classList.remove('hidden');
                     uploadedImageBase64 = compressedBase64;
-                    showToast('بہترین', 'تصویر اپلوڈ اور بہتر کر دی گئی ہے!', 'fa-solid fa-circle-check text-emerald-400');
+                    showToast('بہترین', 'تصویر بالکل تیار ہے!', 'fa-solid fa-circle-check text-emerald-400');
                 });
             }
         }
 
-        // نئی پروڈکٹ کلاؤڈ ڈیٹا بیس میں محفوظ کرنا
+        // نئی پروڈکٹ محفوظ کرنا
         async function saveNewProduct(e) {
             e.preventDefault();
-            if (!user) {
-                showToast('تنبہ', 'کلاؤڈ ڈیٹا بیس سے رابطہ قائم نہیں ہو سکا!', 'fa-solid fa-circle-exclamation text-yellow-500');
-                return;
-            }
             
             const name = document.getElementById('prodName').value.trim();
             const price = parseFloat(document.getElementById('prodPrice').value);
             const desc = document.getElementById('prodDesc').value.trim();
             
             if (!name || isNaN(price)) {
-                showToast('تنبہ', 'پلیز نام اور ریٹ درست طریقے سے درج کریں!', 'fa-solid fa-circle-exclamation text-yellow-500');
+                showToast('تنبہ', 'پلیز درست نام اور ریٹ درج کریں!', 'fa-solid fa-circle-exclamation text-yellow-500');
                 return;
             }
 
             const finalImage = uploadedImageBase64 || placeholderImg;
+            const tempId = Date.now().toString();
 
             const productData = {
                 name: name,
@@ -466,15 +525,29 @@
                 createdAt: Date.now()
             };
 
-            try {
-                const colRef = getProductsCollection();
-                await addDoc(colRef, productData);
-                closeModal('addProductModal');
-                showToast('کامیابی', 'نئی پروڈکٹ کامیابی سے شامل کر دی گئی ہے!', 'fa-solid fa-circle-check text-emerald-400');
-            } catch (error) {
-                console.error("محفوظ کرنے میں خلل:", error);
-                showToast('خرابی', 'کلاؤڈ پر محفوظ کرنے میں ناکامی آئی۔', 'fa-solid fa-circle-xmark text-red-500');
+            // اگر فائر بیس فعال ہے
+            if (user && !isOfflineMode) {
+                try {
+                    const colRef = getProductsCollection();
+                    await addDoc(colRef, productData);
+                    closeModal('addProductModal');
+                    showToast('کامیابی', 'پروڈکٹ کلاؤڈ ڈیٹا بیس میں محفوظ کر لی گئی ہے!', 'fa-solid fa-circle-check text-emerald-400');
+                } catch (error) {
+                    console.error("کلاؤڈ پر محفوظ کرنے میں ناکامی، لوکل پر محفوظ کیا جا رہا ہے:", error);
+                    saveLocally(tempId, productData);
+                }
+            } else {
+                saveLocally(tempId, productData);
             }
+        }
+
+        function saveLocally(id, data) {
+            const localProduct = { id: id, ...data };
+            products.unshift(localProduct);
+            saveToLocalStorage();
+            renderProducts();
+            closeModal('addProductModal');
+            showToast('مقامی کامیابی', 'پروڈکٹ موبائل کی میموری میں محفوظ کر دی گئی ہے!', 'fa-solid fa-circle-check text-sky-400');
         }
 
         // پروڈکٹس کو اسکرین پر رینڈر کرنا
@@ -533,7 +606,7 @@
             });
         }
 
-        // سرچ اور فلٹر کرنا
+        // فلٹر سرچ
         function filterProducts() {
             const query = document.getElementById('searchBar').value.toLowerCase().trim();
             if (query === '') {
@@ -552,26 +625,39 @@
             renderProducts();
         }
 
-        // پروڈکٹ ڈیلیٹ کرنا
+        // ڈیلیٹ پروڈکٹ
         let productToDeleteId = null;
         function triggerDelete(id) {
             productToDeleteId = id;
             openModal('deleteConfirmModal');
         }
 
-        // ڈیلیٹ کی تصدیق کا ایکشن فائر بیس کے ساتھ
+        // ڈیلیٹ کی توثیق
         document.getElementById('confirmDeleteBtn').onclick = async function() {
-            if (!user || !productToDeleteId) return;
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productToDeleteId);
-                await deleteDoc(docRef);
-                closeModal('deleteConfirmModal');
-                showToast('توجہ', 'پروڈکٹ کو کلاؤڈ سے کامیابی سے حذف کر دیا گیا ہے!', 'fa-solid fa-circle-exclamation text-red-500');
-            } catch (error) {
-                console.error("حذف کرنے میں خرابی:", error);
-                showToast('خرابی', 'پروڈکٹ کو حذف کرنے میں خرابی پیش آئی۔', 'fa-solid fa-circle-xmark text-red-500');
+            if (!productToDeleteId) return;
+            
+            if (user && !isOfflineMode) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productToDeleteId);
+                    await deleteDoc(docRef);
+                    closeModal('deleteConfirmModal');
+                    showToast('توجہ', 'پروڈکٹ کو کلاؤڈ ڈیٹا بیس سے حذف کر دیا گیا ہے!', 'fa-solid fa-circle-exclamation text-red-500');
+                } catch (error) {
+                    console.error("کلاؤڈ ڈیلیٹ ناکام:", error);
+                    deleteLocally();
+                }
+            } else {
+                deleteLocally();
             }
         };
+
+        function deleteLocally() {
+            products = products.filter(p => p.id !== productToDeleteId);
+            saveToLocalStorage();
+            renderProducts();
+            closeModal('deleteConfirmModal');
+            showToast('مقامی توجہ', 'پروڈکٹ کو موبائل میموری سے حذف کر دیا گیا ہے!', 'fa-solid fa-circle-exclamation text-red-500');
+        }
 
         // ایڈٹ ماڈل کھولنا
         function openEditModal(id) {
@@ -591,33 +677,48 @@
             openModal('editProductModal');
         }
 
-        // ترمیم شدہ پروڈکٹ کلاؤڈ پر محفوظ کرنا
+        // ایڈٹ شدہ پروڈکٹ سیو کرنا
         async function saveEditedProduct(e) {
             e.preventDefault();
-            if (!user) return;
-
             const id = document.getElementById('editProdId').value;
             const name = document.getElementById('editProdName').value.trim();
             const price = parseFloat(document.getElementById('editProdPrice').value);
             const desc = document.getElementById('editProdDesc').value.trim();
 
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', id);
-                await updateDoc(docRef, {
-                    name: name,
-                    price: price,
-                    desc: desc || "کوئی تفصیل نہیں دی گئی۔",
-                    image: uploadedImageBase64 || placeholderImg
-                });
-                closeModal('editProductModal');
-                showToast('کامیابی', 'تبدیلیاں کلاؤڈ پر محفوظ کر لی گئی ہیں!', 'fa-solid fa-circle-check text-emerald-400');
-            } catch (error) {
-                console.error("ایڈٹ کرنے میں خرابی:", error);
-                showToast('خرابی', 'ڈیٹا تبدیل کرنے میں خلل آیا۔', 'fa-solid fa-circle-xmark text-red-500');
+            const updatedData = {
+                name: name,
+                price: price,
+                desc: desc || "کوئی تفصیل نہیں دی گئی۔",
+                image: uploadedImageBase64 || placeholderImg
+            };
+
+            if (user && !isOfflineMode) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', id);
+                    await updateDoc(docRef, updatedData);
+                    closeModal('editProductModal');
+                    showToast('کامیابی', 'تبدیلیاں کلاؤڈ پر اپلوڈ ہو چکی ہیں!', 'fa-solid fa-circle-check text-emerald-400');
+                } catch (error) {
+                    console.error("کلاؤڈ اپڈیٹ ناکام، لوکل ترمیم کر رہے ہیں:", error);
+                    updateLocally(id, updatedData);
+                }
+            } else {
+                updateLocally(id, updatedData);
             }
         }
 
-        // ٹوسٹ نوٹیفکیشن سسٹم
+        function updateLocally(id, data) {
+            const index = products.findIndex(p => p.id === id);
+            if (index !== -1) {
+                products[index] = { ...products[index], ...data };
+                saveToLocalStorage();
+                renderProducts();
+                closeModal('editProductModal');
+                showToast('مقامی کامیابی', 'تبدیلیاں موبائل میموری میں محفوظ کر لی گئی ہیں!', 'fa-solid fa-circle-check text-sky-400');
+            }
+        }
+
+        // ٹوسٹ سسٹم
         function showToast(title, msg, iconClass) {
             const toast = document.getElementById('toast');
             const toastIcon = document.getElementById('toastIcon');
@@ -635,7 +736,7 @@
             }, 3000);
         }
 
-        // تصویر اور ریٹ واٹس ایپ پر بھیجنا
+        // تصویر اور پروڈکٹ واٹس ایپ پر بھیجنا
         async function shareProductWithImage(id) {
             const prod = products.find(p => p.id === id);
             if (!prod) return;
@@ -676,7 +777,6 @@
             }
         }
 
-        // واٹس ایپ ٹیکسٹ فال بیک
         function fallbackWhatsAppText(text) {
             showToast('معلومات', 'موبائل شیئر مینیو دستیاب نہیں ہے۔ واٹس ایپ پر صرف ٹیکسٹ اور لنک بھیجا جا رہا ہے۔', 'fa-solid fa-circle-info text-blue-400');
             setTimeout(() => {
@@ -686,7 +786,7 @@
             }, 1500);
         }
 
-        // مکمل ٹیکسٹ لسٹ واٹس ایپ پر بھیجنا
+        // مکمل ٹیکسٹ لسٹ واٹس ایپ کرنا
         function shareOnWhatsApp() {
             if (products.length === 0) {
                 showToast('تنبہ', 'پہلے کیٹلاگ میں پروڈکٹس شامل کریں!', 'fa-solid fa-circle-info text-yellow-500');
@@ -714,7 +814,38 @@
             window.open(waUrl, '_blank');
         }
 
-        // پی ڈی ایف واٹس ایپ پر فائل کے طور پر بھیجنا
+        // پی ڈی ایف ایلیمنٹس بنانے کا مشترکہ اور جدید ٹیمپلیٹ (بڑی تصویر کے ساتھ)
+        function buildPDFTable() {
+            const tableArea = document.getElementById('pdfProductsTable');
+            tableArea.innerHTML = ''; // پرانا مواد صاف کریں
+
+            products.forEach((prod, index) => {
+                // پی ڈی ایف کے لیے ایک خوبصورت اور کشادہ کارڈ لے آؤٹ، تصویر کو 'w-36 h-36' کیا گیا ہے (بڑا سائز)
+                const row = `
+                    <div class="flex items-start gap-6 border-b border-slate-200 pb-6 mb-6 pdf-item" style="page-break-inside: avoid; break-inside: avoid;">
+                        <!-- بڑی پروڈکٹ امیج -->
+                        <div class="w-36 h-36 flex-shrink-0 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+                            <img src="${prod.image}" class="w-full h-full object-cover">
+                        </div>
+                        <!-- پروڈکٹ کی تفصیلات اور ریٹ -->
+                        <div class="flex-grow flex flex-col justify-between min-h-[9rem] py-1">
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-900">${index + 1}. ${prod.name}</h3>
+                                <p class="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed">${prod.desc}</p>
+                            </div>
+                            <div class="mt-4 flex justify-between items-center">
+                                <span class="bg-teal-50 text-teal-800 text-sm sm:text-base font-bold px-4 py-1.5 rounded-lg border border-teal-100 inline-block">
+                                    💰 قیمت: ${prod.price} روپے
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                tableArea.innerHTML += row;
+            });
+        }
+
+        // پی ڈی ایف واٹس ایپ پر فائل کے طور پر شیئر کرنا
         async function sharePDFOnWhatsApp() {
             if (products.length === 0) {
                 showToast('تنبہ', 'پہلے کیٹلاگ میں پروڈکٹس شامل کریں!', 'fa-solid fa-circle-info text-yellow-500');
@@ -726,33 +857,16 @@
                 return;
             }
 
-            showToast('پروسیسنگ', 'پی ڈی ایف فائل تیار ہو رہی ہے...', 'fa-solid fa-spinner animate-spin text-indigo-400');
+            showToast('پروسیسنگ', 'بڑی تصاویر والا پی ڈی ایف کیٹلاگ تیار کیا جا رہا ہے...', 'fa-solid fa-spinner animate-spin text-indigo-400');
 
-            const tableArea = document.getElementById('pdfProductsTable');
-            tableArea.innerHTML = '';
-            products.forEach((prod, index) => {
-                const row = `
-                    <div class="flex items-center gap-4 border-b border-slate-200 pb-4">
-                        <div class="w-16 h-16 flex-shrink-0 bg-slate-50 border rounded-lg overflow-hidden">
-                            <img src="${prod.image}" class="w-full h-full object-cover">
-                        </div>
-                        <div class="flex-grow">
-                            <h3 class="text-base font-bold text-slate-800">${index + 1}. ${prod.name}</h3>
-                            <p class="text-xs text-slate-500 mt-1">${prod.desc}</p>
-                        </div>
-                        <div class="text-left font-bold text-teal-700 text-lg whitespace-nowrap min-w-[100px]">
-                            ${prod.price} روپے
-                        </div>
-                    </div>
-                `;
-                tableArea.innerHTML += row;
-            });
+            // جدید ٹیبل بلڈ کریں
+            buildPDFTable();
 
             const element = document.getElementById('pdfPrintArea');
             const opt = {
                 margin:       10,
                 filename:     `Catalog.pdf`,
-                image:        { type: 'jpeg', quality: 0.95 },
+                image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
@@ -766,13 +880,13 @@
                 
                 element.parentElement.className = originalClass;
 
-                const pdfFile = new File([pdfBlob], `پی_ڈی_ایف_کیٹلاگ.pdf`, { type: 'application/pdf' });
+                const pdfFile = new File([pdfBlob], `پروڈکٹ_کیٹلاگ.pdf`, { type: 'application/pdf' });
 
                 if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
                     await navigator.share({
                         files: [pdfFile],
-                        title: 'پروڈکٹ کیٹلاگ پی ڈی ایف',
-                        text: 'ہمارا آفیشل پروڈکٹ کیٹلاگ (پی ڈی ایف) ملاحظہ فرمائیں۔'
+                        title: 'پروفیشنل پروڈکٹ کیٹلاگ',
+                        text: 'ہمارا جدید پروڈکٹ کیٹلاگ (پی ڈی ایف) ملاحظہ فرمائیں۔'
                     });
                     showToast('کامیابی', 'پی ڈی ایف فائل شیئر کے لیے تیار ہو گئی ہے!', 'fa-solid fa-circle-check text-emerald-400');
                 } else {
@@ -785,35 +899,17 @@
             }
         }
 
-        // روایتی پی ڈی ایف ڈاؤن لوڈ
+        // پی ڈی ایف ڈاؤن لوڈ کرنا
         function generatePDF() {
             if (products.length === 0) {
                 showToast('تنبہ', 'پی ڈی ایف بنانے کے لیے کم از کم ایک پروڈکٹ شامل کریں!', 'fa-solid fa-circle-info text-yellow-500');
                 return;
             }
 
-            showToast('پروسیسنگ', 'پی ڈی ایف کیٹلاگ تیار کی جا رہی ہے، براہ کرم انتظار کریں...', 'fa-solid fa-spinner animate-spin text-blue-500');
+            showToast('پروسیسنگ', 'بڑی تصاویر والا پی ڈی ایف کیٹلاگ تیار کیا جا رہا ہے...', 'fa-solid fa-spinner animate-spin text-blue-500');
 
-            const tableArea = document.getElementById('pdfProductsTable');
-            tableArea.innerHTML = '';
-
-            products.forEach((prod, index) => {
-                const row = `
-                    <div class="flex items-center gap-4 border-b border-slate-200 pb-4">
-                        <div class="w-16 h-16 flex-shrink-0 bg-slate-50 border rounded-lg overflow-hidden">
-                            <img src="${prod.image}" class="w-full h-full object-cover">
-                        </div>
-                        <div class="flex-grow">
-                            <h3 class="text-base font-bold text-slate-800">${index + 1}. ${prod.name}</h3>
-                            <p class="text-xs text-slate-500 mt-1">${prod.desc}</p>
-                        </div>
-                        <div class="text-left font-bold text-teal-700 text-lg whitespace-nowrap min-w-[100px]">
-                            ${prod.price} روپے
-                        </div>
-                    </div>
-                `;
-                tableArea.innerHTML += row;
-            });
+            // جدید ٹیبل بلڈ کریں
+            buildPDFTable();
 
             const element = document.getElementById('pdfPrintArea');
             const opt = {
@@ -829,7 +925,7 @@
 
             html2pdf().set(opt).from(element).save().then(() => {
                 element.parentElement.className = originalClass;
-                showToast('کامیابی', 'پی ڈی ایف کامیابی سے ڈاؤن لوڈ کر دی گئی ہے!', 'fa-solid fa-circle-check text-emerald-400');
+                showToast('کامیابی', 'بڑی تصویروں والا پی ڈی ایف کیٹلاگ ڈاؤن لوڈ ہو گیا ہے!', 'fa-solid fa-circle-check text-emerald-400');
             }).catch(err => {
                 element.parentElement.className = originalClass;
                 showToast('خرابی', 'پی ڈی ایف بنانے میں دشواری پیش آئی ہے!', 'fa-solid fa-circle-xmark text-red-500');
@@ -837,7 +933,7 @@
             });
         }
 
-        // ES ماڈیول کے تمام فنکشنز کو ونڈو (global window) آبجیکٹ پر بائنڈ کرنا تاکہ HTML کلک ایونٹس ٹھیک سے کام کریں
+        // فنکشنز ونڈو بائنڈنگ
         window.openModal = openModal;
         window.closeModal = closeModal;
         window.previewImage = previewImage;
