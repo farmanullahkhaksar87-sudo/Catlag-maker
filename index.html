@@ -55,7 +55,7 @@
                     <h1 class="text-xl sm:text-2xl font-bold tracking-wide">ڈیجیٹل کیٹلاگ میکر</h1>
                     <div class="flex items-center gap-2 flex-wrap mt-1">
                         <p class="text-xs text-teal-100">پروڈکٹس مینیج کریں، تصاویر اور پی ڈی ایف واٹس ایپ پر شیئر کریں</p>
-                        <!-- کلاؤڈ ڈیٹا بیس کا لائیو اسٹیٹس -->
+                        <!-- کلاؤڈ ڈیٹا بیس کا لائیو اسٹیٹس (صرف ایڈمن کے لیے اہم ہے لیکن کسٹمر کو بھی کنکشن دکھائے گا) -->
                         <div id="dbStatusBadge">
                             <span class="bg-teal-800/50 text-teal-200 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-spinner animate-spin"></i> منسلک ہو رہا ہے...
@@ -64,7 +64,8 @@
                     </div>
                 </div>
             </div>
-            <div class="flex gap-2">
+            <!-- نئی پروڈکٹ ایڈ کرنے کا بٹن (صرف ایڈمن کو نظر آئے گا) -->
+            <div class="flex gap-2 admin-only">
                 <button onclick="openModal('addProductModal')" class="bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold px-4 py-2.5 rounded-lg shadow-md transition duration-200 flex items-center gap-2 text-sm sm:text-base">
                     <i class="fa-solid fa-plus"></i>
                     نئی پروڈکٹ شامل کریں
@@ -73,8 +74,18 @@
         </div>
     </header>
 
-    <!-- ہیلپ الرٹ برائے فائر بیس کنکشن -->
-    <div id="firebaseHelpAlert" class="hidden container mx-auto px-4 mt-4 max-w-7xl">
+    <!-- کسٹمر خوش آمدید بینر (صرف گاہکوں کو نظر آئے گا) -->
+    <div id="customerWelcomeBanner" class="hidden container mx-auto px-4 mt-6 max-w-7xl">
+        <div class="bg-gradient-to-r from-teal-50 to-emerald-50 border-r-4 border-emerald-600 p-4 rounded-xl shadow-xs text-emerald-950">
+            <h3 class="font-bold text-base sm:text-lg flex items-center gap-2">
+                <span>👋</span> خوش آمدید! ہمارا ڈیجیٹل پروڈکٹ کیٹلاگ ملاحظہ فرمائیں
+            </h3>
+            <p class="text-xs sm:text-sm text-emerald-800 mt-1">آپ کسی بھی پروڈکٹ کو خریدنے یا مزید معلومات کے لیے اس کے نیچے بنے سبز بٹن پر کلک کر کے ہمیں واٹس ایپ پر براہِ راست آرڈر بھیج سکتے ہیں۔</p>
+        </div>
+    </div>
+
+    <!-- ہیلپ الرٹ برائے فائر بیس کنکشن (صرف ایڈمن کے لیے) -->
+    <div id="firebaseHelpAlert" class="hidden container mx-auto px-4 mt-4 max-w-7xl admin-only">
         <div class="bg-amber-50 border-r-4 border-amber-500 p-4 rounded-xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-900 text-xs sm:text-sm">
             <div class="flex items-start gap-3">
                 <i class="fa-solid fa-circle-info text-amber-600 text-lg mt-0.5"></i>
@@ -97,7 +108,7 @@
             <!-- پروڈکٹ کاؤنٹ کارڈ -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-slate-500 font-bold">کل پروڈکٹس</p>
+                    <p class="text-sm text-slate-500 font-bold">کل دستیاب مصنوعات</p>
                     <h3 id="totalProductsCount" class="text-2xl font-bold text-teal-600 mt-1">0</h3>
                 </div>
                 <div class="bg-teal-50 p-3 rounded-lg text-teal-600 text-xl">
@@ -113,16 +124,21 @@
             </div>
         </div>
 
-        <!-- ایکشن بٹنز -->
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 mb-6 flex flex-col sm:flex-row gap-3 justify-between items-center">
+        <!-- ایکشن بٹنز (صرف ایڈمن پینل پر ظاہر ہوں گے) -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 mb-6 flex flex-col sm:flex-row gap-3 justify-between items-center admin-only">
             <div>
                 <h2 class="text-base font-bold text-slate-700 flex items-center gap-2">
                     <i class="fa-solid fa-gears text-teal-600"></i>
-                    کیٹلاگ مینیجر
+                    کیٹلاگ مینیجر (ایڈمن کنٹرولز)
                 </h2>
-                <p class="text-xs text-slate-400 mt-0.5">پورا کیٹلاگ پی ڈی ایف فائل یا ٹیکسٹ فارمیٹ میں شیئر کریں۔</p>
+                <p class="text-xs text-slate-400 mt-0.5">پورا کیٹلاگ پی ڈی ایف یا ٹیکسٹ فارمیٹ میں شیئر کریں اور کسٹمرز لنک کاپی کریں۔</p>
             </div>
             <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                <!-- کسٹمر لنک کاپی کرنے کا خصوصی بٹن -->
+                <button onclick="copyCustomerLink()" class="flex-1 sm:flex-none bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2.5 rounded-lg text-sm font-bold shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-link"></i>
+                    کسٹمر شیئر لنک کاپی کریں
+                </button>
                 <button onclick="generatePDF()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-file-pdf"></i>
                     پی ڈی ایف ڈاؤن لوڈ کریں
@@ -144,8 +160,8 @@
                 <i class="fa-solid fa-box-open"></i>
             </div>
             <h3 class="text-lg font-bold text-slate-600 mb-1">کوئی پروڈکٹ موجود نہیں ہے</h3>
-            <p class="text-slate-400 text-sm mb-4">اپنا پہلا کیٹلاگ بنانے کے لیے نیچے بٹن دبا کر پروڈکٹ شامل کریں!</p>
-            <button onclick="openModal('addProductModal')" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-4 py-2 rounded-lg shadow-md transition">
+            <p class="text-slate-400 text-sm mb-4">کیٹلاگ میں پروڈکٹس لوڈ ہونے کا انتظار کریں یا ایڈمن موڈ میں پروڈکٹ شامل کریں!</p>
+            <button onclick="openModal('addProductModal')" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-4 py-2 rounded-lg shadow-md transition admin-only">
                 پہلی پروڈکٹ شامل کریں
             </button>
         </div>
@@ -279,7 +295,7 @@
         </div>
     </div>
 
-    <!-- پی ڈی ایف پرنٹ ٹیمپلیٹ (موبائل پر کٹنے سے بچانے کے لیے فکسڈ 794px چوڑائی) -->
+    <!-- پی ڈی ایف پرنٹ ٹیمپلیٹ -->
     <div class="hidden">
         <div id="pdfPrintArea" style="width: 794px; padding: 40px; box-sizing: border-box; background-color: #ffffff; direction: rtl; text-align: right;">
             <!-- ہیڈر -->
@@ -326,6 +342,7 @@
         // فائر بیس شروع کرنا
         let app, auth, db, appId;
         let isOfflineMode = false;
+        let isCustomerMode = false; // کسٹمر موڈ کو مانیٹر کرنے والا فلیگ
 
         try {
             app = initializeApp(firebaseConfig);
@@ -343,8 +360,44 @@
 
         const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100%' height='100%' fill='%23f1f5f9'/><text x='50%' y='50%' font-size='11' font-family='sans-serif' fill='%2394a3b8' dominant-baseline='middle' text-anchor='middle'>تصویر منتخب نہیں کی گئی</text></svg>";
 
+        // کسٹمر یا ایڈمن موڈ معلوم کرنا (URL پیرامیٹر کی مدد سے)
+        const checkMode = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('view') === 'customer') {
+                isCustomerMode = true;
+                
+                // ایڈمن والے عناصر چھپا دیں
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+                // کسٹمر والے عناصر دکھائیں
+                document.getElementById('customerWelcomeBanner').classList.remove('hidden');
+            } else {
+                isCustomerMode = false;
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+                document.getElementById('customerWelcomeBanner').classList.add('hidden');
+            }
+        };
+
+        // کسٹمر شیئر لنک کاپی کرنے کا فنکشن (سماٹ لنک جنریٹر)
+        function copyCustomerLink() {
+            // موجودہ URL سے کسی بھی پرانے پیرامیٹر کو صاف کر کے صرف اصل پاتھ حاصل کریں
+            const baseUrl = window.location.href.split('?')[0];
+            const customerUrl = `${baseUrl}?view=customer`;
+
+            // کسٹم امپلیمنٹیشن (موبائل اور آئی فریم سیکیورٹی ایشوز سے بچنے کے لیے گائیڈ لائن فالو کی گئی ہے)
+            const tempInput = document.createElement('input');
+            tempInput.value = customerUrl;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast('کامیابی', 'گاہکوں کو بھیجنے والا لنک کاپی ہو گیا ہے! اب آپ اسے واٹس ایپ پر کسی کو بھی شیئر کر سکتے ہیں۔', 'fa-solid fa-copy text-teal-400');
+        }
+
         // کلاؤڈ سائن ان لاجک
         const initAuth = async () => {
+            checkMode(); // پیج لوڈ ہوتے ہی موڈ چیک کریں
+
             if (isOfflineMode) {
                 switchToOfflineMode();
                 return;
@@ -368,7 +421,10 @@
                 <span class="bg-amber-100 text-amber-800 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
                     <i class="fa-solid fa-house-laptop"></i> مقامی اسٹوریج (آف لائن)
                 </span>`;
-            document.getElementById('firebaseHelpAlert').classList.remove('hidden');
+            
+            if (!isCustomerMode) {
+                document.getElementById('firebaseHelpAlert').classList.remove('hidden');
+            }
             loadProductsFromLocalStorage();
         }
 
@@ -399,7 +455,7 @@
                 if (user && !isOfflineMode) {
                     document.getElementById('dbStatusBadge').innerHTML = `
                         <span class="bg-emerald-100 text-emerald-800 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
-                            <i class="fa-solid fa-cloud-bolt"></i> کلاؤڈ ڈیٹا بیس لائیو ہے
+                            <i class="fa-solid fa-cloud-bolt"></i> کلاؤڈ لائیو ہے
                         </span>`;
                     document.getElementById('firebaseHelpAlert').classList.add('hidden');
                     setupProductsListener();
@@ -482,7 +538,7 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85); // 85% کوالٹی پی ڈی ایف پرنٹنگ کے لیے بہترین ہے
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85); 
                     callback(dataUrl);
                 };
                 img.src = e.target.result;
@@ -553,7 +609,7 @@
             showToast('مقامی کامیابی', 'پروڈکٹ موبائل کی میموری میں محفوظ کر دی گئی ہے!', 'fa-solid fa-circle-check text-sky-400');
         }
 
-        // پروڈکٹس کو اسکرین پر رینڈر کرنا
+        // پروڈکٹس کو اسکرین پر رینڈر کرنا (ایڈمن اور کسٹمر لے آؤٹ کنٹرول کے ساتھ)
         function renderProducts(filteredList = null) {
             const listToRender = filteredList || products;
             const grid = document.getElementById('productsGrid');
@@ -574,6 +630,34 @@
             grid.innerHTML = '';
 
             listToRender.forEach(prod => {
+                // اگر کسٹمر موڈ ایکٹیو ہو تو ایڈمن ایڈٹ بٹن چھپا کر آرڈر والا بٹن بنائیں
+                let actionButtonsHTML = '';
+
+                if (isCustomerMode) {
+                    actionButtonsHTML = `
+                        <button onclick="orderProductOnWhatsApp('${prod.id}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-xs transition flex items-center justify-center gap-2 shadow-sm">
+                            <i class="fa-brands fa-whatsapp text-sm"></i>
+                            💬 واٹس ایپ پر آرڈر کریں
+                        </button>
+                    `;
+                } else {
+                    actionButtonsHTML = `
+                        <button onclick="shareProductWithImage('${prod.id}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs transition flex items-center justify-center gap-2 shadow-sm">
+                            <i class="fa-brands fa-whatsapp text-sm"></i>
+                            تصویر اور ریٹ واٹس ایپ کریں
+                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="openEditModal('${prod.id}')" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-2 rounded-lg text-xs transition flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                                ایڈٹ
+                            </button>
+                            <button onclick="triggerDelete('${prod.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg text-xs transition" title="حذف کریں">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+
                 const card = `
                     <div class="bg-white rounded-2xl shadow-sm hover:shadow-md border border-slate-100 overflow-hidden flex flex-col group transition duration-300">
                         <div class="relative h-44 overflow-hidden bg-slate-50 flex items-center justify-center">
@@ -588,25 +672,25 @@
                                 <p class="text-xs text-slate-400 line-clamp-2 min-h-[2.5rem]">${prod.desc}</p>
                             </div>
                             <div class="space-y-2 mt-4 pt-3 border-t border-slate-100">
-                                <button onclick="shareProductWithImage('${prod.id}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs transition flex items-center justify-center gap-2 shadow-sm">
-                                    <i class="fa-brands fa-whatsapp text-sm"></i>
-                                    تصویر اور ریٹ واٹس ایپ کریں
-                                </button>
-                                <div class="flex gap-2">
-                                    <button onclick="openEditModal('${prod.id}')" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-2 rounded-lg text-xs transition flex items-center justify-center gap-1">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                        ایڈٹ
-                                    </button>
-                                    <button onclick="triggerDelete('${prod.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg text-xs transition" title="حذف کریں">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
-                                </div>
+                                ${actionButtonsHTML}
                             </div>
                         </div>
                     </div>
                 `;
                 grid.innerHTML += card;
             });
+        }
+
+        // کسٹمر کے لیے واٹس ایپ پر براہ راست پروڈکٹ آرڈر بھیجنے کا لاجک
+        function orderProductOnWhatsApp(id) {
+            const prod = products.find(p => p.id === id);
+            if (!prod) return;
+
+            const text = `🌟 *السلام علیکم!* 🌟\n\nمیں آپ کے ڈیجیٹل پروڈکٹ کیٹلاگ سے درج ذیل پروڈکٹ کا آرڈر دینا چاہتا ہوں:\n\n📦 *پروڈکٹ:* ${prod.name}\n💰 *ریٹ/قیمت:* ${prod.price} روپے\n📝 *تفصیل:* ${prod.desc}\n\nبراہ کرم میرے آرڈر کی تصدیق فرمائیں۔ شکریہ!`;
+            
+            const encodedText = encodeURIComponent(text);
+            const waUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+            window.open(waUrl, '_blank');
         }
 
         // فلٹر سرچ
@@ -739,7 +823,7 @@
             }, 3000);
         }
 
-        // تصویر اور پروڈکٹ واٹس ایپ پر بھیجنا
+        // تصویر اور پروڈکٹ ایڈمن واٹس ایپ شیئرنگ
         async function shareProductWithImage(id) {
             const prod = products.find(p => p.id === id);
             if (!prod) return;
@@ -817,31 +901,27 @@
             window.open(waUrl, '_blank');
         }
 
-        // پی ڈی ایف ٹیمپلیٹ بنانا (بغیر کسی کٹنگ کے فکسڈ پکسلز اور بڑی لکھیت کے ساتھ)
+        // پی ڈی ایف ٹیمپلیٹ بنانا
         function buildPDFTable() {
             const tableArea = document.getElementById('pdfProductsTable');
-            tableArea.innerHTML = ''; // پرانا مواد صاف کریں
+            tableArea.innerHTML = ''; 
 
             products.forEach((prod, index) => {
-                // ہر پروڈکٹ کو ایک واضح اور بڑے کارڈ لے آؤٹ میں تبدیل کیا گیا ہے جو کٹے گا نہیں
                 const row = `
                     <div class="pdf-item" style="display: flex; flex-direction: row; gap: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 24px; margin-bottom: 12px; align-items: center; box-sizing: border-box;">
-                        <!-- پروڈکٹ کی تصویر کا فکسڈ اور محفوظ فریم -->
+                        <!-- تصویر -->
                         <div style="width: 180px; height: 180px; min-width: 180px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 5px;">
                             <img src="${prod.image}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
                         </div>
                         
-                        <!-- تفصیلات کا بڑا کالم -->
+                        <!-- تفصیلات -->
                         <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 10px; text-align: right;">
-                            <!-- بڑا پروڈکٹ نام -->
                             <h3 style="font-size: 26px; font-weight: bold; color: #0f172a; margin: 0; line-height: 1.4; font-family: sans-serif;">
                                 ${index + 1}. ${prod.name}
                             </h3>
-                            <!-- بڑی اور آرام دہ لکھیت والی تفصیل -->
                             <p style="font-size: 16px; color: #475569; margin: 0; line-height: 1.6; font-family: sans-serif;">
                                 ${prod.desc}
                             </p>
-                            <!-- بڑا اور دلکش قیمت کا بیج -->
                             <div style="margin-top: 10px;">
                                 <span style="background-color: #f0fdf4; color: #166534; font-size: 20px; font-weight: bold; padding: 8px 20px; border-radius: 10px; border: 1px solid #bbf7d0; display: inline-block; font-family: sans-serif;">
                                     💰 ریٹ: ${prod.price} روپے
@@ -868,7 +948,6 @@
 
             showToast('پروسیسنگ', 'بڑی تصاویر والا پی ڈی ایف کیٹلاگ تیار کیا جا رہا ہے...', 'fa-solid fa-spinner animate-spin text-indigo-400');
 
-            // جدید ٹیبل بلڈ کریں
             buildPDFTable();
 
             const element = document.getElementById('pdfPrintArea');
@@ -876,7 +955,7 @@
                 margin:       10,
                 filename:     `Catalog.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, width: 794 }, // فکسڈ چوڑائی کوالٹی کو برقرار رکھنے کے لیے
+                html2canvas:  { scale: 2, useCORS: true, width: 794 }, 
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
@@ -917,7 +996,6 @@
 
             showToast('پروسیسنگ', 'بڑی تصاویر والا پی ڈی ایف کیٹلاگ تیار کیا جا رہا ہے...', 'fa-solid fa-spinner animate-spin text-blue-500');
 
-            // جدید ٹیبل بلڈ کریں
             buildPDFTable();
 
             const element = document.getElementById('pdfPrintArea');
@@ -925,7 +1003,7 @@
                 margin:       10,
                 filename:     `Product_Catalog_${Date.now()}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, width: 794 }, // فکسڈ چوڑائی تاکہ تصویر کٹے نہیں
+                html2canvas:  { scale: 2, useCORS: true, width: 794 }, 
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
@@ -942,11 +1020,11 @@
             });
         }
 
-        // تاریخ کو کلاؤڈ لائیو میں اپڈیٹ کرنا
+        // تاریخ سیٹ کرنا
         const today = new Date();
         document.getElementById('pdfDate').innerText = today.toLocaleDateString('ur-PK', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        // فنکشنز ونڈو بائنڈنگ
+        // ماڈیولر فنکشنز ونڈو بائنڈنگ
         window.openModal = openModal;
         window.closeModal = closeModal;
         window.previewImage = previewImage;
@@ -960,6 +1038,8 @@
         window.shareOnWhatsApp = shareOnWhatsApp;
         window.sharePDFOnWhatsApp = sharePDFOnWhatsApp;
         window.generatePDF = generatePDF;
+        window.copyCustomerLink = copyCustomerLink; // نیا لنک کاپی بٹن بائنڈ کیا گیا ہے
+        window.orderProductOnWhatsApp = orderProductOnWhatsApp; // کسٹمر واٹس ایپ آرڈر بٹن بائنڈ کیا گیا ہے
 
     </script>
 </body>
